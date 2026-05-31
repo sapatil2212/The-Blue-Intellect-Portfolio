@@ -203,13 +203,9 @@ export default function AboutPage() {
             <span>Our Belief</span>
           </div>
           
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-white leading-relaxed font-display max-w-3xl mx-auto">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white to-neutral-400 leading-relaxed font-display max-w-3xl mx-auto">
             "No business is average. You can take your business to the greatest heights. You just need strong determination and a trustworthy marketing partner."
           </h2>
-          
-          <p className="text-xs sm:text-sm text-neutral-450 leading-relaxed max-w-2xl mx-auto">
-            Embark on your dream journey with us and take your business to the next level. Let's discuss your roadmap today.
-          </p>
           
           <div className="pt-4">
             <Link

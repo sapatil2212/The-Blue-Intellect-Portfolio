@@ -20,7 +20,7 @@ interface HomeClientProps {
 
 export default function HomeClient({ projects, isAdmin = false }: HomeClientProps) {
   return (
-    <div className="w-full flex flex-col pt-16 overflow-hidden">
+    <div className="w-full flex flex-col overflow-hidden">
       <HeroSection />
       <TrustedBySection />
       <AboutSection />

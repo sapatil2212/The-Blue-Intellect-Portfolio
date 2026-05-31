@@ -92,6 +92,12 @@ const approachSteps = [
     icon: <FileText className="h-5 w-5 text-violet-500" />,
     title: "Reporting",
     description: "Report project progress at each level to ensure transparency with clients."
+  },
+  {
+    step: "08",
+    icon: <Sparkles className="h-5 w-5 text-rose-500" />,
+    title: "Scaling & Growth",
+    description: "Continuously scaling successful strategies and optimizing assets for long-term compound growth."
   }
 ];
 export default function AboutPage() {

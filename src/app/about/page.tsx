@@ -203,7 +203,7 @@ export default function AboutPage() {
             <span>Our Belief</span>
           </div>
           
-          <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-neutral-100 to-neutral-400 leading-relaxed font-display max-w-3xl mx-auto">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-neutral-300 to-neutral-500 leading-relaxed font-display max-w-3xl mx-auto">
             "No business is average. You can take your business to the greatest heights. You just need strong determination and a trustworthy marketing partner."
           </h2>
           

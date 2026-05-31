@@ -324,7 +324,6 @@ html:not(.dark) .admin-layout {
   --input-bg: #111111;
 }
 
-/* Override variables in light mode */
 html:not(.dark) {
   --bg: #f8fafc;
   --fg: #0f172a;
@@ -332,24 +331,29 @@ html:not(.dark) {
   --surface-1: rgba(241, 245, 249, 0.9);
   --surface-2: rgba(226, 232, 240, 0.8);
   --surface-3: rgba(203, 213, 225, 0.7);
-  --border: rgba(59, 130, 246, 0.15);
-  --border-light: rgba(59, 130, 246, 0.25);
+  --border: rgba(15, 23, 42, 0.08);
+  --border-light: rgba(15, 23, 42, 0.12);
   --muted: #475569;
   --muted-fg: #334155;
-  --card-bg: linear-gradient(135deg, rgba(255,255,255,0.90) 0%, rgba(241,245,249,0.85) 50%, rgba(226,232,240,0.80) 100%);
-  --card-hover: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(241,245,249,0.95) 50%, rgba(210,240,250,0.90) 100%);
+  --card-bg: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(248,250,252,0.90) 100%);
+  --card-hover: linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(248,250,252,0.95) 100%);
   --glass-bg: linear-gradient(135deg, rgba(255,255,255,0.75) 0%, rgba(241,245,249,0.70) 100%);
-  --glass-border: rgba(59, 130, 246, 0.18);
+  --glass-border: rgba(15, 23, 42, 0.08);
   
   --accent: #2563eb;
   --accent-light: #3b82f6;
   --accent-dark: #1d4ed8;
   
-  --grid-line: rgba(59, 130, 246, 0.06);
-  --dot-color: rgba(59, 130, 246, 0.12);
-  --shadow-color: rgba(59, 130, 246, 0.12);
-  --testimonial-bg: linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(241,245,249,0.85) 60%, rgba(226,232,240,0.78) 100%);
+  --grid-line: rgba(15, 23, 42, 0.03);
+  --dot-color: rgba(15, 23, 42, 0.05);
+  --shadow-color: rgba(0, 0, 0, 0.03);
+  --testimonial-bg: linear-gradient(135deg, rgba(255,255,255,0.92) 0%, rgba(241,245,249,0.85) 60%, rgba(248,250,252,0.80) 100%);
   --input-bg: rgba(255, 255, 255, 0.9);
+}
+
+/* Hide section glows completely in light mode to remove any blue background casts */
+html:not(.dark) .section-glow {
+  display: none !important;
 }
 
 /* Gradient text */

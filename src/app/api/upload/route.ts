@@ -18,22 +18,30 @@ export async function POST(req: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Ensure the uploads directory exists in /public/uploads
+    // Generate unique name: timestamp + sanitized original name
+    const timestamp = Date.now();
+    const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
+    const uniqueFileName = `${timestamp}-${sanitizedFileName}`;
+
+    // 1. If Vercel Blob token is set, use Vercel Blob (Production Storage)
+    if (process.env.BLOB_READ_WRITE_TOKEN) {
+      const { put } = await import("@vercel/blob");
+      const blob = await put(`uploads/${uniqueFileName}`, file, {
+        access: "public",
+        token: process.env.BLOB_READ_WRITE_TOKEN,
+      });
+      return NextResponse.json({ success: true, url: blob.url });
+    }
+
+    // 2. Otherwise, fallback to Local File System (Local Development)
     const uploadsDir = join(process.cwd(), "public", "uploads");
     if (!existsSync(uploadsDir)) {
       await mkdir(uploadsDir, { recursive: true });
     }
 
-    // Generate unique name: timestamp + sanitized original name
-    const timestamp = Date.now();
-    const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
-    const uniqueFileName = `${timestamp}-${sanitizedFileName}`;
     const filePath = join(uploadsDir, uniqueFileName);
-
-    // Write file to server disk
     await writeFile(filePath, buffer);
     
-    // Return relative URL for frontend access
     const url = `/uploads/${uniqueFileName}`;
 
     return NextResponse.json({ success: true, url });

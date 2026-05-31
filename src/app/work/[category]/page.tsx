@@ -46,8 +46,10 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     notFound();
   }
 
-  const projects = await getProjectsAction();
-  const isAdmin = await checkAuthAction();
+  const [projects, isAdmin] = await Promise.all([
+    getProjectsAction(),
+    checkAuthAction(),
+  ]);
 
   return <ShowcaseClient projects={projects} initialCategory={category} isAdmin={isAdmin} />;
 }

@@ -6,8 +6,10 @@ import HomeClient from "@/components/home/HomeClient";
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const projects = await getProjectsAction();
-  const isAdmin = await checkAuthAction();
+  const [projects, isAdmin] = await Promise.all([
+    getProjectsAction(),
+    checkAuthAction(),
+  ]);
 
   return <HomeClient projects={projects} isAdmin={isAdmin} />;
 }

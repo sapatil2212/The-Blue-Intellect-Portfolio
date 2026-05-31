@@ -9,6 +9,9 @@ import { revalidatePath } from "next/cache";
 let localProjectsState: ProjectType[] = [];
 let localCategoriesState = [...MOCK_CATEGORIES];
 
+// Cache seeding status in-memory for the current container lifecycle
+let categoriesSeeded = false;
+
 /**
  * Helper to check if database connection is alive
  */
@@ -23,9 +26,21 @@ async function isDbConnected(): Promise<boolean> {
 
 /**
  * Ensures all categories in MOCK_CATEGORIES are present in the database.
+ * Optimized to prevent repeated sequential database upserts on every query.
  */
 async function ensureCategoriesSeeded() {
+  if (categoriesSeeded) return;
   try {
+    const dbConnected = await isDbConnected();
+    if (!dbConnected) return;
+
+    // First check if categories are already in database via a single quick count query
+    const count = await db.category.count();
+    if (count >= MOCK_CATEGORIES.length) {
+      categoriesSeeded = true;
+      return;
+    }
+
     for (const cat of MOCK_CATEGORIES) {
       await db.category.upsert({
         where: { slug: cat.slug },
@@ -33,6 +48,7 @@ async function ensureCategoriesSeeded() {
         create: { id: cat.id, name: cat.name, slug: cat.slug },
       });
     }
+    categoriesSeeded = true;
   } catch (error) {
     console.error("ensureCategoriesSeeded failed:", error);
   }

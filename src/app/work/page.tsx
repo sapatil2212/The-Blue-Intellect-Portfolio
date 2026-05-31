@@ -10,8 +10,10 @@ export const metadata = {
 };
 
 export default async function WorkPage() {
-  const projects = await getProjectsAction();
-  const isAdmin = await checkAuthAction();
+  const [projects, isAdmin] = await Promise.all([
+    getProjectsAction(),
+    checkAuthAction(),
+  ]);
 
   return <ShowcaseClient projects={projects} initialCategory="all" isAdmin={isAdmin} />;
 }

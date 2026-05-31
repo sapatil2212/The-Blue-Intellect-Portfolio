@@ -414,7 +414,8 @@ export default function AdminPortfolioPage() {
 
   const filteredPortfolioProjects = portfolioProjects.filter((proj) => {
     const matchesSearch = proj.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          proj.description.toLowerCase().includes(searchQuery.toLowerCase());
+                          proj.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (proj.subType && proj.subType.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesCategory = selectedCategory ? proj.categoryId === selectedCategory : true;
     const matchesType = selectedType ? proj.projectType === selectedType : true;
     return matchesSearch && matchesCategory && matchesType;

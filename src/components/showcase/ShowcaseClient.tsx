@@ -106,6 +106,7 @@ export default function ShowcaseClient({
         !searchQuery ||
         p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (p.subType && p.subType.toLowerCase().includes(searchQuery.toLowerCase())) ||
         p.tags?.some(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()));
       return isLive && matchesCategory && matchesSubType && matchesSearch;
     });

@@ -5,7 +5,6 @@ import { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Play } from 'lucide-react';
 import { FaInstagram, FaXTwitter, FaFacebookF, FaLinkedinIn, FaPinterestP, FaYoutube, FaGlobe, FaBullhorn } from 'react-icons/fa6';
-import SaaSDashboardMockup from './SaaSDashboardMockup';
 
 export default function HeroSection() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -228,9 +227,6 @@ export default function HeroSection() {
             <span>Dedicated Strategy Experts</span>
           </div>
         </div>
-
-        {/* State-of-the-art SaaS dashboard mockup below social proof */}
-        <SaaSDashboardMockup />
 
       </div>
     </section>

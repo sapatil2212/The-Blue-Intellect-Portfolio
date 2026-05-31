@@ -23,35 +23,35 @@ import ThemeToggle from "@/components/layout/ThemeToggle";
 import { servicesData } from "@/lib/servicesData";
 
 const containerVariants = {
-  hidden: { y: "-100%", opacity: 0 },
+  hidden: { opacity: 0, y: -12, scale: 0.98 },
   visible: {
-    y: 0,
     opacity: 1,
+    y: 0,
+    scale: 1,
     transition: {
-      type: "spring" as const,
-      stiffness: 280,
-      damping: 30,
-      staggerChildren: 0.05,
-      delayChildren: 0.1
+      duration: 0.25,
+      ease: [0.16, 1, 0.3, 1] as const, // easeOutExpo
+      staggerChildren: 0.04,
+      delayChildren: 0.05
     }
   },
   exit: {
-    y: "-100%",
     opacity: 0,
+    y: -8,
+    scale: 0.98,
     transition: {
-      type: "spring" as const,
-      stiffness: 300,
-      damping: 35,
-      staggerChildren: 0.03,
+      duration: 0.2,
+      ease: [0.16, 1, 0.3, 1] as const,
+      staggerChildren: 0.02,
       staggerDirection: -1
     }
   }
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 15 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" as const } },
-  exit: { opacity: 0, y: -10, transition: { duration: 0.25, ease: "easeIn" as const } }
+  hidden: { opacity: 0, y: 8 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.2, ease: "easeOut" as const } },
+  exit: { opacity: 0, y: -4, transition: { duration: 0.15, ease: "easeIn" as const } }
 };
 
 export default function FloatingNavbar() {
@@ -364,125 +364,139 @@ export default function FloatingNavbar() {
             </button>
           </div>
         </div>
+
+        {/* Mobile Dropdown Card inside header wrapper for pixel-perfect vertical alignment */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="absolute left-4 right-4 top-[calc(100%-8px)] z-40 md:hidden glass rounded-3xl border border-neutral-200 dark:border-neutral-850 p-6 flex flex-col gap-4 shadow-2xl bg-white/95 dark:bg-neutral-950/95 overflow-y-auto"
+              style={{ maxHeight: 'calc(80vh)', overflowY: 'auto' }}
+            >
+              <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-2">
+                  {/* Home Link */}
+                  <motion.div variants={itemVariants}>
+                    <Link
+                      href="/"
+                      className={cn(
+                        "px-4 py-3 rounded-xl text-lg font-bold text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-100 transition-colors flex items-center justify-between",
+                        pathname === "/" && "text-white dark:text-white bg-linear-to-r from-sky-400 via-sky-500 to-blue-600"
+                      )}
+                    >
+                      Home
+                    </Link>
+                  </motion.div>
+
+                  {/* Work Link */}
+                  <motion.div variants={itemVariants}>
+                    <Link
+                      href="/work"
+                      className={cn(
+                        "px-4 py-3 rounded-xl text-lg font-bold text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-100 transition-colors flex items-center justify-between",
+                        pathname === "/work" && "text-white dark:text-white bg-linear-to-r from-sky-400 via-sky-500 to-blue-600"
+                      )}
+                    >
+                      Work
+                    </Link>
+                  </motion.div>
+
+                  {/* Mobile Services Accordion */}
+                  <motion.div variants={itemVariants} className="flex flex-col">
+                    <button
+                      onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
+                      className={cn(
+                        "px-4 py-3 rounded-xl text-lg font-bold text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-100 transition-colors flex items-center justify-between cursor-pointer w-full text-left",
+                        pathname.startsWith("/services") && "text-primary dark:text-primary-foreground bg-primary/10 border-primary/10 border"
+                      )}
+                    >
+                      <span>Services</span>
+                      <ChevronDown className={cn("size-5 transition-transform duration-200", mobileServicesOpen && "rotate-180")} />
+                    </button>
+
+                    <AnimatePresence>
+                      {mobileServicesOpen && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.25, ease: "easeInOut" }}
+                          className="overflow-hidden pl-4 flex flex-col gap-1.5 mt-1 border-l border-border/60 ml-2"
+                        >
+                          {servicesData.map((item) => (
+                            <Link
+                              key={item.slug}
+                              href={`/services/${item.slug}`}
+                              className={cn(
+                                "px-3 py-2.5 rounded-lg text-sm font-semibold text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 transition-colors",
+                                pathname === `/services/${item.slug}` && "text-primary font-bold bg-primary/5"
+                              )}
+                            >
+                              {item.title}
+                            </Link>
+                          ))}
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </motion.div>
+
+                  {/* About, Contact Links */}
+                  {["About", "Contact"].map((name) => {
+                    const href = `/${name.toLowerCase()}`;
+                    const isActive = pathname === href;
+                    return (
+                      <motion.div key={name} variants={itemVariants}>
+                        <Link
+                          href={href}
+                          className={cn(
+                            "px-4 py-3 rounded-xl text-lg font-bold text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-100 transition-colors flex items-center justify-between",
+                            isActive && "text-white dark:text-white bg-linear-to-r from-sky-400 via-sky-500 to-blue-600"
+                          )}
+                        >
+                          {name}
+                        </Link>
+                      </motion.div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <motion.div variants={itemVariants} className="flex flex-col gap-6 mt-auto">
+                <hr className="border-neutral-100 dark:border-neutral-800" />
+                <div className="flex flex-col gap-3 text-left">
+                  <Link
+                    href="/login"
+                    className="text-center text-sm font-semibold text-neutral-600 dark:text-neutral-400 py-3 rounded-xl hover:bg-neutral-50 dark:hover:bg-neutral-900/50 transition-colors"
+                  >
+                    Client Portal Login
+                  </Link>
+                  <Link
+                    href="/contact"
+                    className="text-center text-sm font-semibold text-white bg-linear-to-r from-sky-400 via-sky-500 to-blue-600 hover:from-sky-500 hover:to-blue-700 py-3.5 rounded-xl shadow-md transition-all active:scale-[0.98]"
+                  >
+                    Start a Project
+                  </Link>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.header>
 
-      {/* Mobile Drawer Overlay */}
+      {/* Blurred dark backdrop overlay wash behind the dropdown card */}
       <AnimatePresence>
         {mobileMenuOpen && (
           <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            className="fixed inset-0 z-40 md:hidden flex flex-col justify-between bg-white/98 dark:bg-black/98 backdrop-blur-xl p-6 pt-28 pb-10 overflow-y-auto"
-            style={{ height: '100dvh', width: '100vw' }}
-          >
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col gap-2">
-                {/* Home Link */}
-                <motion.div variants={itemVariants}>
-                  <Link
-                    href="/"
-                    className={cn(
-                      "px-4 py-3 rounded-xl text-lg font-bold text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-100 transition-colors flex items-center justify-between",
-                      pathname === "/" && "text-white dark:text-white bg-linear-to-r from-sky-400 via-sky-500 to-blue-600"
-                    )}
-                  >
-                    Home
-                  </Link>
-                </motion.div>
-
-                {/* Work Link */}
-                <motion.div variants={itemVariants}>
-                  <Link
-                    href="/work"
-                    className={cn(
-                      "px-4 py-3 rounded-xl text-lg font-bold text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-100 transition-colors flex items-center justify-between",
-                      pathname === "/work" && "text-white dark:text-white bg-linear-to-r from-sky-400 via-sky-500 to-blue-600"
-                    )}
-                  >
-                    Work
-                  </Link>
-                </motion.div>
-
-                {/* Mobile Services Accordion */}
-                <motion.div variants={itemVariants} className="flex flex-col">
-                  <button
-                    onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
-                    className={cn(
-                      "px-4 py-3 rounded-xl text-lg font-bold text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-100 transition-colors flex items-center justify-between cursor-pointer w-full text-left",
-                      pathname.startsWith("/services") && "text-primary dark:text-primary-foreground bg-primary/10 border-primary/10 border"
-                    )}
-                  >
-                    <span>Services</span>
-                    <ChevronDown className={cn("size-5 transition-transform duration-200", mobileServicesOpen && "rotate-180")} />
-                  </button>
-
-                  <AnimatePresence>
-                    {mobileServicesOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.25, ease: "easeInOut" }}
-                        className="overflow-hidden pl-4 flex flex-col gap-1.5 mt-1 border-l border-border/60 ml-2"
-                      >
-                        {servicesData.map((item) => (
-                          <Link
-                            key={item.slug}
-                            href={`/services/${item.slug}`}
-                            className={cn(
-                              "px-3 py-2.5 rounded-lg text-sm font-semibold text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-200 transition-colors",
-                              pathname === `/services/${item.slug}` && "text-primary font-bold bg-primary/5"
-                            )}
-                          >
-                            {item.title}
-                          </Link>
-                        ))}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-
-                {/* About, Contact Links */}
-                {["About", "Contact"].map((name) => {
-                  const href = `/${name.toLowerCase()}`;
-                  const isActive = pathname === href;
-                  return (
-                    <motion.div key={name} variants={itemVariants}>
-                      <Link
-                        href={href}
-                        className={cn(
-                          "px-4 py-3 rounded-xl text-lg font-bold text-neutral-600 dark:text-neutral-400 hover:text-neutral-950 dark:hover:text-neutral-100 transition-colors flex items-center justify-between",
-                          isActive && "text-white dark:text-white bg-linear-to-r from-sky-400 via-sky-500 to-blue-600"
-                        )}
-                      >
-                        {name}
-                      </Link>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <motion.div variants={itemVariants} className="flex flex-col gap-6 mt-auto">
-              <hr className="border-neutral-100 dark:border-neutral-800" />
-              <div className="flex flex-col gap-3 text-left">
-                <Link
-                  href="/login"
-                  className="text-center text-sm font-semibold text-neutral-600 dark:text-neutral-400 py-3 rounded-xl hover:bg-neutral-50 dark:hover:bg-neutral-900/50 transition-colors"
-                >
-                  Client Portal Login
-                </Link>
-                <Link
-                  href="/contact"
-                  className="text-center text-sm font-semibold text-white bg-linear-to-r from-sky-400 via-sky-500 to-blue-600 hover:from-sky-500 hover:to-blue-700 py-3.5 rounded-xl shadow-md transition-all active:scale-[0.98]"
-                >
-                  Start a Project
-                </Link>
-              </div>
-            </motion.div>
-          </motion.div>
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setMobileMenuOpen(false)}
+            className="fixed inset-0 z-30 bg-black/35 dark:bg-black/60 backdrop-blur-xs md:hidden"
+          />
         )}
       </AnimatePresence>
     </>

@@ -336,7 +336,7 @@ function TrustedBySection() {
               <img
                 src={`/images/logo/${logo.file}`}
                 alt={logo.name}
-                style={{ width: 100, height: 44, objectFit: 'contain', objectPosition: 'center' }}
+                style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'center', padding: '6px' }}
                 loading="lazy"
               />
             </div>

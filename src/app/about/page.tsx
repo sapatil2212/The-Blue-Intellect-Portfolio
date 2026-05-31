@@ -94,22 +94,6 @@ const approachSteps = [
     description: "Report project progress at each level to ensure transparency with clients."
   }
 ];
-
-const crew = [
-  {
-    name: "Sophia Chen",
-    role: "Co-Founder & UI/UX Architect",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300",
-    desc: "Ex-Stripe designer focusing on layout grids, spatial motion transitions, and interactive design prototypes."
-  },
-  {
-    name: "Liam O'Connor",
-    role: "Co-Founder & Lead Systems Engineer",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300",
-    desc: "Full-stack engineer focusing on Next.js server frameworks, Prisma schema indexes, and Core Web Vital loads."
-  }
-];
-
 export default function AboutPage() {
   return (
     <div className="w-full max-w-7xl mx-auto px-6 md:px-12 pt-32 pb-24 space-y-28">
@@ -149,7 +133,7 @@ export default function AboutPage() {
               <div className="absolute top-4 right-4 text-4xl font-black text-neutral-200/40 dark:text-neutral-800/30 select-none">
                 {item.step}
               </div>
-              <div className="h-10 w-10 rounded-xl bg-neutral-50 dark:bg-neutral-900 flex items-center justify-center border border-neutral-100 dark:border-neutral-850">
+              <div className="h-10 w-10 rounded-xl bg-neutral-50 dark:bg-neutral-900 flex items-center justify-center border border-neutral-100/50 dark:border-neutral-800/30">
                 {item.icon}
               </div>
               <div className="space-y-2">
@@ -198,7 +182,7 @@ export default function AboutPage() {
       </section>
 
       {/* Section 4: Our Belief Banner & Got a Project CTA */}
-      <section className="relative overflow-hidden rounded-3xl border border-neutral-200/80 dark:border-neutral-850/80 bg-neutral-950 p-8 sm:p-12 md:p-16 text-center max-w-5xl mx-auto shadow-2xl">
+      <section className="relative overflow-hidden rounded-3xl border border-neutral-200/30 dark:border-neutral-800/20 bg-neutral-950 p-8 sm:p-12 md:p-16 text-center max-w-5xl mx-auto shadow-2xl">
         {/* Subtle Radial Blue spotlight inside the dark box */}
         <div 
           className="absolute inset-0 pointer-events-none" 
@@ -230,38 +214,6 @@ export default function AboutPage() {
               <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
-        </div>
-      </section>
-
-      {/* Section 5: Team Crew */}
-      <section className="border-t border-neutral-100 dark:border-neutral-850 pt-20 text-center space-y-12">
-        <div className="space-y-3">
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 text-[10px] font-bold uppercase tracking-wider border border-purple-500/15 dark:border-purple-400/15">
-            <Award className="h-3.5 w-3.5" />
-            <span>The Crew</span>
-          </div>
-          <h2 className="text-3xl md:text-5xl font-extrabold text-neutral-900 dark:text-neutral-50 tracking-tight">
-            Creative & Tech Leadership
-          </h2>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          {crew.map((member, idx) => (
-            <GradientCard key={idx} className="p-6 flex flex-col items-center">
-              <img
-                src={member.avatar}
-                className="h-20 w-20 rounded-full object-cover shadow-sm ring-2 ring-blue-500/10"
-                alt={member.name}
-              />
-              <h4 className="mt-4 text-sm font-bold text-neutral-900 dark:text-neutral-50">{member.name}</h4>
-              <p className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold uppercase tracking-wider mt-1">
-                {member.role}
-              </p>
-              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-3 max-w-xs leading-relaxed">
-                {member.desc}
-              </p>
-            </GradientCard>
-          ))}
         </div>
       </section>
 

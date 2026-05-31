@@ -31,7 +31,7 @@ export default function GradientCard({
     <div
       onMouseMove={handleMouseMove}
       className={cn(
-        "group relative rounded-3xl border border-neutral-200/60 dark:border-neutral-800/80 bg-white/90 dark:bg-neutral-900/90 p-6 backdrop-blur-xs shadow-[0_4px_30px_rgba(0,0,0,0.02)] transition-all duration-300 hover:shadow-lg hover:shadow-neutral-200/20 dark:hover:shadow-none",
+        "group relative rounded-3xl border border-neutral-200/40 dark:border-neutral-800/20 bg-white/90 dark:bg-neutral-900/90 p-6 backdrop-blur-xs shadow-[0_4px_30px_rgba(0,0,0,0.02)] transition-all duration-300 hover:shadow-lg hover:shadow-neutral-200/20 dark:hover:shadow-none",
         className
       )}
       {...props}

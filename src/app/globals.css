@@ -351,9 +351,18 @@ html:not(.dark) {
   --input-bg: rgba(255, 255, 255, 0.9);
 }
 
-/* Hide section glows completely in light mode to remove any blue background casts */
-html:not(.dark) .section-glow {
+/* Hide all background glows and blue effects completely in light mode to ensure a pure white layout */
+html:not(.dark) .section-glow,
+html:not(.dark) .hero-glow,
+html:not(.dark) .hero-glow-secondary,
+html:not(.dark) .blur-\[80px\],
+html:not(.dark) .blur-\[120px\] {
   display: none !important;
+}
+
+/* Neutralize section dividers in light mode */
+html:not(.dark) .section-divider {
+  background: linear-gradient(to right, transparent, rgba(15, 23, 42, 0.08), transparent) !important;
 }
 
 /* Gradient text */

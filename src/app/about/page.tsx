@@ -2,147 +2,269 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Sparkles, Terminal, Activity, Eye, Zap, ShieldAlert, Award } from "lucide-react";
+import Link from "next/link";
+import { 
+  Sparkles, 
+  Terminal, 
+  Activity, 
+  Zap, 
+  Award, 
+  ArrowRight,
+  Clock,
+  Search,
+  Calendar,
+  Compass,
+  LineChart,
+  FileText,
+  UserCheck,
+  Cpu,
+  Heart,
+  HelpCircle
+} from "lucide-react";
 import GradientCard from "@/components/ui/GradientCard";
 
-const timeline = [
+const setsUsApart = [
   {
     step: "01",
-    title: "Discovery & Blueprint Sprints",
-    description: "We align on core product objectives, design aesthetic direction, database schemas, and establish the custom prompt model frameworks."
+    icon: <UserCheck className="h-5 w-5 text-blue-500" />,
+    title: "Dedicated Project Manager",
+    description: "Experience your project being taken care of by experts at each level."
   },
   {
     step: "02",
-    title: "Interactive Prototyping",
-    description: "Our design architects build responsive Figma assets and interactive Framer canvases. We finalize video reels scripts and UGC angles."
+    icon: <FileText className="h-5 w-5 text-emerald-500" />,
+    title: "Periodic Reports",
+    description: "Track the progress of your projects, get the reports delivered in your inbox weekly."
   },
   {
     step: "03",
-    title: "Full-Stack Assembly",
-    description: "We build out the Next.js app structure, configure Prisma connection strings, generate Server Actions, and implement Framer scroll animations."
+    icon: <Cpu className="h-5 w-5 text-amber-500" />,
+    title: "Tailor-Made Solutions",
+    description: "We customise solutions suitable to your needs."
   },
   {
     step: "04",
-    title: "Verification & Launch",
-    description: "Every page undergoes Core Web Vitals checks. We ensure a 90+ Lighthouse score, confirm database indices are operational, and deploy to Vercel."
+    icon: <Clock className="h-5 w-5 text-purple-500" />,
+    title: "On Time Delivery",
+    description: "We stand by our commitments and always deliver projects on time."
   }
 ];
 
-const values = [
-  { icon: <Zap className="h-5 w-5 text-amber-500" />, title: "Aesthetic Excellence", text: "Every layout, shadow, and animation must feel premium. We do not do basic templates." },
-  { icon: <Terminal className="h-5 w-5 text-blue-500" />, title: "Engineering Rigor", text: "We write clean, semantic, fully type-safe TypeScript code coupled with stable database ORMs." },
-  { icon: <Activity className="h-5 w-5 text-emerald-500" />, title: "AI Acceleration", text: "We utilize Midjourney, Sora, and custom models to produce visual content at warp speed." }
+const approachSteps = [
+  {
+    step: "01",
+    icon: <Search className="h-5 w-5 text-blue-500" />,
+    title: "Detailing",
+    description: "Understanding your needs and detailing the project requirements."
+  },
+  {
+    step: "02",
+    icon: <Calendar className="h-5 w-5 text-teal-500" />,
+    title: "Planning",
+    description: "Setting up an action plan to achieve desired results."
+  },
+  {
+    step: "03",
+    icon: <Compass className="h-5 w-5 text-indigo-500" />,
+    title: "Strategy",
+    description: "Procedure perceiving to execute plans to accomplish."
+  },
+  {
+    step: "04",
+    icon: <Activity className="h-5 w-5 text-pink-500" />,
+    title: "Analysis",
+    description: "Analysing the problem with attention to even minor details."
+  },
+  {
+    step: "05",
+    icon: <Zap className="h-5 w-5 text-amber-500" />,
+    title: "Implementation",
+    description: "Ensuring effective implementation of strategies and solutions to increase efficiency."
+  },
+  {
+    step: "06",
+    icon: <LineChart className="h-5 w-5 text-emerald-500" />,
+    title: "Measuring",
+    description: "Measure every outcome for its optimum efficacy."
+  },
+  {
+    step: "07",
+    icon: <FileText className="h-5 w-5 text-violet-500" />,
+    title: "Reporting",
+    description: "Report project progress at each level to ensure transparency with clients."
+  }
+];
+
+const crew = [
+  {
+    name: "Sophia Chen",
+    role: "Co-Founder & UI/UX Architect",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300",
+    desc: "Ex-Stripe designer focusing on layout grids, spatial motion transitions, and interactive design prototypes."
+  },
+  {
+    name: "Liam O'Connor",
+    role: "Co-Founder & Lead Systems Engineer",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300",
+    desc: "Full-stack engineer focusing on Next.js server frameworks, Prisma schema indexes, and Core Web Vital loads."
+  }
 ];
 
 export default function AboutPage() {
   return (
-    <div className="w-full max-w-7xl mx-auto px-6 md:px-12 pt-32 pb-24 space-y-24">
-      {/* Hero */}
+    <div className="w-full max-w-7xl mx-auto px-6 md:px-12 pt-32 pb-24 space-y-28">
+      
+      {/* Section 1: Hero */}
       <section className="text-center max-w-3xl mx-auto space-y-4">
-        <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] font-semibold uppercase tracking-wider border border-blue-500/15 dark:border-blue-400/15">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase tracking-wider border border-blue-500/15 dark:border-blue-400/15">
           <Sparkles className="h-3.5 w-3.5 fill-blue-500/20" />
           <span>Our Philosophy</span>
         </div>
-        <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50 leading-tight">
+        <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-neutral-900 dark:text-neutral-50 leading-tight">
           Pioneering Synthetic Creative Design.
         </h1>
-        <p className="text-sm md:text-base text-neutral-600 dark:text-neutral-300 leading-relaxed">
-          The Blue Intellect is a boutique full-stack engineering and visual design studio. We partner with next-gen SaaS startups and creative labels to design, build, and deploy high-end digital systems.
+        <p className="text-sm md:text-base text-neutral-600 dark:text-neutral-350 leading-relaxed max-w-2xl mx-auto">
+          The Blue Intellect is a boutique full-stack engineering and visual design studio. We partner with next-gen startups and creative labels to design, build, and deploy high-end digital systems.
         </p>
       </section>
 
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {values.map((v, idx) => (
-          <GradientCard key={idx} glowColor="rgba(59, 130, 246, 0.08)" className="space-y-4">
-            <div className="h-10 w-10 rounded-xl bg-neutral-50 dark:bg-neutral-900 flex items-center justify-center border border-neutral-100 dark:border-neutral-800">
-              {v.icon}
-            </div>
-            <h3 className="text-base font-bold text-neutral-900 dark:text-neutral-50">{v.title}</h3>
-            <p className="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed">{v.text}</p>
-          </GradientCard>
-        ))}
-      </section>
-
-      {/* Interactive Process Timeline */}
+      {/* Section 2: Why The Blue Intellect / Sets Us Apart */}
       <section className="space-y-12">
-        <div className="text-center space-y-2">
-          <span className="text-[10px] font-semibold uppercase tracking-widest text-blue-600 dark:text-blue-400">The Sprints</span>
-          <h2 className="text-2xl md:text-4xl font-bold text-neutral-900 dark:text-neutral-50 tracking-tight">
-            Our Work Lifecycle.
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider border border-emerald-500/15 dark:border-emerald-400/15">
+            <HelpCircle className="h-3.5 w-3.5" />
+            <span>Why The Blue Intellect</span>
+          </div>
+          <h2 className="text-3xl md:text-5xl font-extrabold text-neutral-900 dark:text-neutral-50 tracking-tight">
+            Here’s What Sets Us Apart!
           </h2>
-          <p className="text-xs text-neutral-500 dark:text-neutral-400 max-w-lg mx-auto">
-            We follow a structured 4-step assembly method to ensure design aesthetics remain premium from discovery to launch.
+          <p className="text-xs md:text-sm text-neutral-500 dark:text-neutral-400 max-w-lg mx-auto">
+            Experience absolute transparency, bespoke design excellence, and dedicated client-first engineering delivery.
           </p>
         </div>
 
-        <div className="relative max-w-4xl mx-auto border-l-2 border-neutral-200/60 dark:border-neutral-800 ml-4 md:ml-auto md:border-l-0 md:before:absolute md:before:left-1/2 md:before:h-full md:before:w-0.5 md:before:bg-neutral-200/60 dark:md:before:bg-neutral-800 pl-8 md:pl-0 space-y-12">
-          {timeline.map((step, idx) => {
-            const isLeft = idx % 2 === 0;
-            return (
-              <motion.div
-                key={step.step}
-                initial={{ opacity: 0, x: isLeft ? -20 : 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                className={`relative flex flex-col md:w-1/2 ${
-                  isLeft ? "md:pr-12 md:mr-auto text-left" : "md:pl-12 md:ml-auto md:items-end text-left md:text-right"
-                }`}
-              >
-                {/* Timeline Circle Node */}
-                <div className="absolute top-1.5 -left-[41px] md:-left-auto md:left-1/2 md:-translate-x-1/2 h-5 w-5 rounded-full bg-blue-600 border-4 border-white dark:border-neutral-900 shadow-md" />
-
-                <div className="space-y-2 max-w-md">
-                  <span className="text-3xl font-semibold text-blue-500/20 dark:text-blue-400/20">{step.step}</span>
-                  <h3 className="text-base font-bold text-neutral-900 dark:text-neutral-50">{step.title}</h3>
-                  <p className="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed">{step.description}</p>
-                </div>
-              </motion.div>
-            );
-          })}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {setsUsApart.map((item, idx) => (
+            <GradientCard key={idx} glowColor="rgba(59, 130, 246, 0.08)" className="relative space-y-6 overflow-hidden">
+              <div className="absolute top-4 right-4 text-4xl font-black text-neutral-200/40 dark:text-neutral-800/30 select-none">
+                {item.step}
+              </div>
+              <div className="h-10 w-10 rounded-xl bg-neutral-50 dark:bg-neutral-900 flex items-center justify-center border border-neutral-100 dark:border-neutral-850">
+                {item.icon}
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-base font-bold text-neutral-900 dark:text-neutral-50">{item.title}</h3>
+                <p className="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed">{item.description}</p>
+              </div>
+            </GradientCard>
+          ))}
         </div>
       </section>
 
-      {/* Team Crew */}
-      <section className="border-t border-neutral-100 dark:border-neutral-800 pt-20 text-center space-y-12">
-        <div className="space-y-2">
-          <span className="text-[10px] font-semibold uppercase tracking-widest text-blue-600 dark:text-blue-400">The Crew</span>
-          <h2 className="text-2xl md:text-4xl font-bold text-neutral-900 dark:text-neutral-50 tracking-tight">
+      {/* Section 3: Our Work Approach */}
+      <section className="space-y-12">
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold uppercase tracking-wider border border-indigo-500/15 dark:border-indigo-400/15">
+            <Compass className="h-3.5 w-3.5" />
+            <span>Methodology</span>
+          </div>
+          <h2 className="text-3xl md:text-5xl font-extrabold text-neutral-900 dark:text-neutral-50 tracking-tight">
+            Our Work Approach
+          </h2>
+          <p className="text-xs md:text-sm text-neutral-500 dark:text-neutral-400 max-w-lg mx-auto">
+            A meticulous, analytics-driven execution pipeline from deep detailing to optimized campaign delivery.
+          </p>
+        </div>
+
+        {/* Approach Horizontal/Vertical Grid Journey */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 max-w-7xl mx-auto">
+          {approachSteps.map((step, idx) => (
+            <GradientCard key={idx} glowColor="rgba(59, 130, 246, 0.08)" className="space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="h-9 w-9 rounded-lg bg-blue-500/10 dark:bg-blue-400/5 text-blue-500 flex items-center justify-center border border-blue-500/10">
+                  {step.icon}
+                </div>
+                <span className="text-xs font-black px-2 py-0.5 rounded-md bg-neutral-100 dark:bg-neutral-850 text-neutral-500 dark:text-neutral-400">
+                  Step {step.step}
+                </span>
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-base font-extrabold text-neutral-900 dark:text-neutral-50 tracking-tight">{step.title}</h3>
+                <p className="text-xs text-neutral-600 dark:text-neutral-400 leading-relaxed">{step.description}</p>
+              </div>
+            </GradientCard>
+          ))}
+        </div>
+      </section>
+
+      {/* Section 4: Our Belief Banner & Got a Project CTA */}
+      <section className="relative overflow-hidden rounded-3xl border border-neutral-200/80 dark:border-neutral-850/80 bg-neutral-950 p-8 sm:p-12 md:p-16 text-center max-w-5xl mx-auto shadow-2xl">
+        {/* Subtle Radial Blue spotlight inside the dark box */}
+        <div 
+          className="absolute inset-0 pointer-events-none" 
+          style={{
+            background: "radial-gradient(circle at center, rgba(59, 130, 246, 0.12) 0%, transparent 65%)"
+          }}
+        />
+        
+        <div className="relative z-10 max-w-3xl mx-auto space-y-8 flex flex-col items-center">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-[10px] font-bold uppercase tracking-wider border border-blue-500/15">
+            <Heart className="h-3.5 w-3.5 fill-blue-500/20 text-blue-500 animate-pulse" />
+            <span>Our Belief</span>
+          </div>
+          
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight text-white leading-relaxed font-display max-w-3xl mx-auto">
+            "No business is average. You can take your business to the greatest heights. You just need strong determination and a trustworthy marketing partner."
+          </h2>
+          
+          <p className="text-xs sm:text-sm text-neutral-450 leading-relaxed max-w-2xl mx-auto">
+            Embark on your dream journey with us and take your business to the next level. Let's discuss your roadmap today.
+          </p>
+          
+          <div className="pt-4">
+            <Link
+              href="/contact"
+              className="glow-button inline-flex items-center gap-2 bg-linear-to-r from-sky-400 via-sky-500 to-blue-600 hover:from-sky-500 hover:to-blue-700 text-white font-extrabold text-xs sm:text-sm px-8 py-4 rounded-xl shadow-lg transition-all active:scale-[0.98] group cursor-pointer"
+            >
+              <span>Got a project? Let's Discuss!</span>
+              <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Section 5: Team Crew */}
+      <section className="border-t border-neutral-100 dark:border-neutral-850 pt-20 text-center space-y-12">
+        <div className="space-y-3">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 text-[10px] font-bold uppercase tracking-wider border border-purple-500/15 dark:border-purple-400/15">
+            <Award className="h-3.5 w-3.5" />
+            <span>The Crew</span>
+          </div>
+          <h2 className="text-3xl md:text-5xl font-extrabold text-neutral-900 dark:text-neutral-50 tracking-tight">
             Creative & Tech Leadership
           </h2>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          <GradientCard className="p-6 flex flex-col items-center">
-            <img
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=300"
-              className="h-20 w-20 rounded-full object-cover shadow-sm ring-2 ring-blue-500/10"
-              alt="Sophia Chen"
-            />
-            <h4 className="mt-4 text-sm font-bold text-neutral-900 dark:text-neutral-50">Sophia Chen</h4>
-            <p className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold uppercase tracking-wider mt-1">
-              Co-Founder & UI/UX Architect
-            </p>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-2 max-w-xs leading-relaxed">
-              Ex-Stripe designer focusing on layout grids, spatial motion transitions, and interactive design prototypes.
-            </p>
-          </GradientCard>
-
-          <GradientCard className="p-6 flex flex-col items-center">
-            <img
-              src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300"
-              className="h-20 w-20 rounded-full object-cover shadow-sm ring-2 ring-blue-500/10"
-              alt="Liam O'Connor"
-            />
-            <h4 className="mt-4 text-sm font-bold text-neutral-900 dark:text-neutral-50">Liam O&apos;Connor</h4>
-            <p className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold uppercase tracking-wider mt-1">
-              Co-Founder & Lead Systems Engineer
-            </p>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-2 max-w-xs leading-relaxed">
-              Full-stack engineer focusing on Next.js server frameworks, Prisma schema indexes, and Core Web Vital loads.
-            </p>
-          </GradientCard>
+          {crew.map((member, idx) => (
+            <GradientCard key={idx} className="p-6 flex flex-col items-center">
+              <img
+                src={member.avatar}
+                className="h-20 w-20 rounded-full object-cover shadow-sm ring-2 ring-blue-500/10"
+                alt={member.name}
+              />
+              <h4 className="mt-4 text-sm font-bold text-neutral-900 dark:text-neutral-50">{member.name}</h4>
+              <p className="text-[10px] text-blue-600 dark:text-blue-400 font-semibold uppercase tracking-wider mt-1">
+                {member.role}
+              </p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-3 max-w-xs leading-relaxed">
+                {member.desc}
+              </p>
+            </GradientCard>
+          ))}
         </div>
       </section>
+
     </div>
   );
 }

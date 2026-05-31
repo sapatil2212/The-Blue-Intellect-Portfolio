@@ -373,6 +373,7 @@ export default function FloatingNavbar() {
               initial="hidden"
               animate="visible"
               exit="exit"
+              data-lenis-prevent
               className="absolute left-4 right-4 top-[calc(100%-8px)] z-40 md:hidden glass rounded-3xl border border-neutral-200 dark:border-neutral-850 p-6 flex flex-col gap-4 shadow-2xl bg-white/95 dark:bg-neutral-950/95 overflow-y-auto"
               style={{ maxHeight: 'calc(80vh)', overflowY: 'auto' }}
             >

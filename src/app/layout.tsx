@@ -58,8 +58,7 @@ export default function RootLayout({
             <div className="absolute bottom-[-10%] left-[20%] w-[50%] h-[50%] rounded-full bg-cyan-400/10 blur-[120px] animate-blob [animation-delay:_8s]" />
           </div>
 
-          {/* Global Grid Overlay */}
-          <div className="absolute inset-0 bg-grid pointer-events-none -z-10" />
+
 
           <SmoothScroll>
             <FloatingNavbar />

@@ -122,6 +122,7 @@ export default function HeroSection() {
   return (
     <section className="hero-bg relative pt-20 pb-16 lg:pt-24 lg:pb-20 min-h-[80vh] flex items-center justify-center">
       <div className="hero-dots" />
+      <div className="absolute inset-0 bg-grid opacity-60 dark:opacity-[0.25] pointer-events-none z-0" />
       <div className="hero-glow" />
       <div className="hero-glow-secondary" />
 

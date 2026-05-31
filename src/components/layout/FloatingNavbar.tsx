@@ -130,12 +130,11 @@ export default function FloatingNavbar() {
         )}
       >
         <div
-          style={{ border: "none" }}
           className={cn(
-            "mx-auto max-w-7xl transition-all duration-500 rounded-full flex items-center justify-between px-6 py-3",
+            "mx-auto max-w-7xl transition-all duration-500 rounded-full flex items-center justify-between px-6 py-3 border",
             scrolled
-              ? "glass shadow-[0_8px_32px_0_rgba(31,38,135,0.06)] bg-white/60 dark:bg-neutral-950/60"
-              : "bg-transparent"
+              ? "bg-white/90 dark:bg-neutral-950/90 border-neutral-200/50 dark:border-neutral-800/40 backdrop-blur-md shadow-[0_8px_32px_0_rgba(0,0,0,0.04)]"
+              : "bg-transparent border-transparent"
           )}
         >
           {/* Logo */}

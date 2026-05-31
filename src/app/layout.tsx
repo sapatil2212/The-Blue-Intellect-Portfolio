@@ -51,11 +51,11 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {/* Soft Background Animated Gradient Orbs */}
+          {/* Soft Background Static Gradient Orbs */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none -z-20">
-            <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-400/10 blur-[120px] animate-blob" />
-            <div className="absolute top-[30%] right-[-10%] w-[45%] h-[45%] rounded-full bg-purple-400/10 blur-[130px] animate-blob [animation-delay:_4s]" />
-            <div className="absolute bottom-[-10%] left-[20%] w-[50%] h-[50%] rounded-full bg-cyan-400/10 blur-[120px] animate-blob [animation-delay:_8s]" />
+            <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-blue-400/10 blur-[120px]" />
+            <div className="absolute top-[30%] right-[-10%] w-[45%] h-[45%] rounded-full bg-purple-400/10 blur-[130px]" />
+            <div className="absolute bottom-[-10%] left-[20%] w-[50%] h-[50%] rounded-full bg-cyan-400/10 blur-[120px]" />
           </div>
 
 

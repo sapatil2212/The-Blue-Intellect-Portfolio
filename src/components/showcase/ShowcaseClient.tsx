@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Globe,
@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import { ProjectType } from "@/store/usePortfolioStore";
 import { cn } from "@/lib/utils";
+import { checkAuthCookieAction } from "@/actions/auth";
 
 interface ShowcaseClientProps {
   projects: ProjectType[];
@@ -67,9 +68,15 @@ function YoutubeIcon({ className }: { className?: string }) {
 export default function ShowcaseClient({
   projects = [],
   initialCategory = "all",
-  isAdmin = false
+  isAdmin: initialIsAdmin = false
 }: ShowcaseClientProps) {
-   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const [isAdmin, setIsAdmin] = useState(initialIsAdmin);
+
+  useEffect(() => {
+    checkAuthCookieAction().then(setIsAdmin);
+  }, []);
+
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [activeProject, setActiveProject] = useState<ProjectType | null>(null);

@@ -54,7 +54,7 @@ export default function HeroSection() {
           ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
           
           particles = [];
-          for (let i = 0; i < 40; i++) {
+          for (let i = 0; i < 15; i++) {
             const p = createParticle();
             p.life = Math.random() * p.maxLife;
             particles.push(p);
@@ -69,7 +69,7 @@ export default function HeroSection() {
       const rect = canvas.getBoundingClientRect();
       ctx.clearRect(0, 0, rect.width, rect.height);
 
-      if (particles.length < 50 && Math.random() < 0.1) {
+      if (particles.length < 25 && Math.random() < 0.1) {
         particles.push(createParticle());
       }
 
@@ -194,11 +194,11 @@ export default function HeroSection() {
           </span>
         </h1>
 
-        <p className="text-sm sm:text-base text-muted max-w-2xl mx-auto mb-10 leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+        <p className="text-sm sm:text-base text-muted max-w-2xl mx-auto mb-10 leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.05s' }}>
           Welcome to The Blue Intellect. We provide comprehensive digital solutions, from Local SEO to Corporate Branding, perfectly designed to help your business thrive and scale efficiently.
         </p>
 
-        <div className="flex flex-row items-center justify-center gap-3 sm:gap-4 mb-6 animate-fade-in-up w-full" style={{ animationDelay: '0.2s' }}>
+        <div className="flex flex-row items-center justify-center gap-3 sm:gap-4 mb-6 animate-fade-in-up w-full" style={{ animationDelay: '0.1s' }}>
           <Link
             href="/contact"
             className="glow-button w-[165px] sm:w-[210px] py-3 text-xs sm:text-sm font-semibold rounded-md inline-flex items-center justify-center gap-1.5 sm:gap-2 text-center"
@@ -216,7 +216,7 @@ export default function HeroSection() {
           </Link>
         </div>
 
-        <div className="flex items-center justify-center gap-6 text-xs text-muted animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+        <div className="flex items-center justify-center gap-6 text-xs text-muted animate-fade-in-up" style={{ animationDelay: '0.15s' }}>
           <div className="flex items-center gap-1.5">
             <Check className="w-3.5 h-3.5 text-accent" />
             <span>Proven Marketing ROI</span>

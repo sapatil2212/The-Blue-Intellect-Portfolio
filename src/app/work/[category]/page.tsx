@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 import { getProjectsAction } from "@/actions/projects";
-import { checkAuthCookieAction } from "@/actions/auth";
 import ShowcaseClient from "@/components/showcase/ShowcaseClient";
 
 const VALID_CATEGORIES = [
@@ -19,6 +18,12 @@ interface CategoryPageProps {
   params: Promise<{
     category: string;
   }>;
+}
+
+export async function generateStaticParams() {
+  return VALID_CATEGORIES.map((category) => ({
+    category,
+  }));
 }
 
 export async function generateMetadata({ params }: CategoryPageProps) {
@@ -46,10 +51,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     notFound();
   }
 
-  const [projects, isAdmin] = await Promise.all([
-    getProjectsAction(),
-    checkAuthCookieAction(),
-  ]);
+  const projects = await getProjectsAction();
 
-  return <ShowcaseClient projects={projects} initialCategory={category} isAdmin={isAdmin} />;
+  return <ShowcaseClient projects={projects} initialCategory={category} />;
 }

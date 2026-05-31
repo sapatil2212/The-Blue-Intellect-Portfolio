@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ProjectType } from '@/store/usePortfolioStore';
 import HeroSection from './HeroSection';
 import TrustedBySection from './TrustedBySection';
@@ -12,13 +12,19 @@ import RecentProjectsSection from './RecentProjectsSection';
 import ManageSection from './ManageSection';
 import TestimonialsSection from './TestimonialsSection';
 import CTASection from './CTASection';
+import { checkAuthCookieAction } from '@/actions/auth';
 
 interface HomeClientProps {
   projects: ProjectType[];
   isAdmin?: boolean;
 }
 
-export default function HomeClient({ projects, isAdmin = false }: HomeClientProps) {
+export default function HomeClient({ projects, isAdmin: initialIsAdmin = false }: HomeClientProps) {
+  const [isAdmin, setIsAdmin] = useState(initialIsAdmin);
+
+  useEffect(() => {
+    checkAuthCookieAction().then(setIsAdmin);
+  }, []);
   return (
     <div className="w-full flex flex-col overflow-hidden">
       <HeroSection />

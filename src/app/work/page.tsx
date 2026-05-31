@@ -1,8 +1,5 @@
 import { getProjectsAction } from "@/actions/projects";
-import { checkAuthAction } from "@/actions/auth";
 import ShowcaseClient from "@/components/showcase/ShowcaseClient";
-
-export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Creative Showcase | The Blue Intellect Portfolio Hub",
@@ -10,10 +7,7 @@ export const metadata = {
 };
 
 export default async function WorkPage() {
-  const [projects, isAdmin] = await Promise.all([
-    getProjectsAction(),
-    checkAuthAction(),
-  ]);
+  const projects = await getProjectsAction();
 
-  return <ShowcaseClient projects={projects} initialCategory="all" isAdmin={isAdmin} />;
+  return <ShowcaseClient projects={projects} initialCategory="all" />;
 }

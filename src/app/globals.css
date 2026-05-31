@@ -36,14 +36,14 @@
 }
 
 :root {
-  --background: 210 40% 98%;
+  --background: 0 0% 100%;
   --foreground: 224 71.4% 4.1%;
   --primary: 220 90% 45%;
   --card: 0 0% 100%;
   --card-foreground: 224 71.4% 4.1%;
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --border: 214.3 31.8% 91.4%;
+  --muted: 220 14.3% 96.1%;
+  --muted-foreground: 220 8.9% 46.1%;
+  --border: 220 13% 91%;
   --ring: 220 90% 45%;
 }
 
@@ -325,7 +325,7 @@ html:not(.dark) .admin-layout {
 }
 
 html:not(.dark) {
-  --bg: #f8fafc;
+  --bg: #ffffff;
   --fg: #0f172a;
   --surface-0: rgba(255, 255, 255, 0.85);
   --surface-1: rgba(241, 245, 249, 0.9);

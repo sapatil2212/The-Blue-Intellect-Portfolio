@@ -108,18 +108,18 @@ export default function HeroSection() {
   }, []);
 
   const floatingLogos = [
-    { icon: <FaFacebookF className="w-4 h-4" color="#1877F2" />, name: 'Facebook', position: 'left-[5%] top-[30%]', delay: '0s' },
+    { icon: <FaFacebookF className="w-4 h-4" color="#1877F2" />, name: 'Facebook', position: 'left-[5%] top-[38%]', delay: '0s' },
     { icon: <FaInstagram className="w-4 h-4" color="#E4405F" />, name: 'Instagram', position: 'left-[15%] bottom-[25%]', delay: '1s' },
-    { icon: <FaXTwitter className="w-4 h-4" />, name: 'X.com', position: 'right-[5%] top-[25%]', delay: '0.5s' },
+    { icon: <FaXTwitter className="w-4 h-4" />, name: 'X.com', position: 'right-[5%] top-[34%]', delay: '0.5s' },
     { icon: <FaLinkedinIn className="w-4 h-4" color="#0A66C2" />, name: 'LinkedIn', position: 'right-[15%] bottom-[20%]', delay: '1.5s' },
-    { icon: <FaPinterestP className="w-4 h-4" color="#E60023" />, name: 'Pinterest', position: 'left-[22%] top-[15%]', delay: '0.8s' },
-    { icon: <FaYoutube className="w-4 h-4" color="#FF0000" />, name: 'YouTube', position: 'right-[25%] top-[12%]', delay: '1.2s' },
+    { icon: <FaPinterestP className="w-4 h-4" color="#E60023" />, name: 'Pinterest', position: 'left-[22%] top-[24%]', delay: '0.8s' },
+    { icon: <FaYoutube className="w-4 h-4" color="#FF0000" />, name: 'YouTube', position: 'right-[25%] top-[22%]', delay: '1.2s' },
     { icon: <FaGlobe className="w-4 h-4" color="#3b82f6" />, name: 'Website', position: 'left-[5%] bottom-[45%]', delay: '0.3s' },
     { icon: <FaBullhorn className="w-4 h-4" color="#3b82f6" />, name: 'Marketing', position: 'right-[5%] bottom-[45%]', delay: '1.8s' },
   ];
 
   return (
-    <section className="hero-bg relative pt-20 pb-16 lg:pt-44 lg:pb-20 min-h-[80vh] flex items-center justify-center">
+    <section className="hero-bg relative pt-20 pb-16 lg:pt-28 lg:pb-20 min-h-[85vh] lg:min-h-screen flex items-center justify-center">
       <div className="hero-dots" />
       <div className="absolute inset-0 bg-grid opacity-60 dark:opacity-[0.25] pointer-events-none z-0" />
       <div className="hero-glow" />
@@ -144,7 +144,7 @@ export default function HeroSection() {
         ))}
       </div>
 
-      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
+      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center pt-10 sm:pt-14 lg:pt-28">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/15 dark:border-blue-400/15 mb-8 animate-fade-in">
           <span className="inline-block w-8 h-5 rounded text-[10px] font-bold flex items-center justify-center" style={{ background: 'var(--accent)', color: '#fff' }}>
             #1
@@ -201,18 +201,18 @@ export default function HeroSection() {
         <div className="flex flex-row items-center justify-center gap-3 sm:gap-4 mb-6 animate-fade-in-up w-full" style={{ animationDelay: '0.2s' }}>
           <Link
             href="/contact"
-            className="glow-button px-4 py-2.5 sm:px-8 sm:py-3.5 text-xs sm:text-sm font-semibold rounded-md inline-flex items-center justify-center gap-1.5 sm:gap-2 flex-1 sm:flex-none max-w-[160px] sm:max-w-none text-center"
+            className="glow-button w-[165px] sm:w-[210px] py-3 text-xs sm:text-sm font-semibold rounded-md inline-flex items-center justify-center gap-1.5 sm:gap-2 text-center"
             style={{ color: '#fff' }}
           >
             Book Appointment
           </Link>
           <Link
             href="/services"
-            className="px-4 py-2.5 sm:px-8 sm:py-3.5 text-xs sm:text-sm font-medium text-fg rounded-md inline-flex items-center justify-center gap-1.5 sm:gap-2 transition-colors flex-1 sm:flex-none max-w-[160px] sm:max-w-none text-center"
+            className="w-[165px] sm:w-[210px] py-3 text-xs sm:text-sm font-medium text-fg rounded-md inline-flex items-center justify-center gap-1.5 sm:gap-2 transition-colors text-center"
             style={{ border: '1px solid var(--border)', background: 'var(--surface-1)' }}
           >
             Explore Services
-            <Play className="w-3 h-3 sm:w-4 sm:h-4 fill-current" />
+            <Play className="w-3.5 h-3.5 fill-current" />
           </Link>
         </div>
 

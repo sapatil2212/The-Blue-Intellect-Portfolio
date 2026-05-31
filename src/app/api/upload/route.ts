@@ -23,9 +23,19 @@ export async function POST(req: NextRequest) {
     const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, "_");
     const uniqueFileName = `${timestamp}-${sanitizedFileName}`;
 
-    // 1. If Cloudinary URL is configured, use Cloudinary (Preferred Production Storage)
-    if (process.env.CLOUDINARY_URL) {
+    // 1. If Cloudinary is configured (either via URL or separate keys), use Cloudinary (Preferred Production Storage)
+    if (process.env.CLOUDINARY_URL || (process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY)) {
       const cloudinary = (await import("cloudinary")).v2;
+      
+      // Configure explicitly to bypass any malformed CLOUDINARY_URL values
+      if (process.env.CLOUDINARY_CLOUD_NAME) {
+        cloudinary.config({
+          cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+          api_key: process.env.CLOUDINARY_API_KEY,
+          api_secret: process.env.CLOUDINARY_API_SECRET,
+          secure: true
+        });
+      }
       
       const base64Data = buffer.toString("base64");
       const fileUri = `data:${file.type};base64,${base64Data}`;

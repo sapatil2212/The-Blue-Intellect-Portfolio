@@ -91,13 +91,11 @@ function SidebarContent({
       {/* Logo */}
       <div className="px-4 py-5 border-b border-neutral-200 dark:border-white/5">
         <div className="flex items-center gap-3">
-          <div className="h-9 w-9 rounded-xl bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
-            <span className="text-base font-black text-white">Æ</span>
-          </div>
-          <div>
-            <p className="text-sm font-extrabold text-neutral-900 dark:text-white tracking-tight leading-none">AetherOS</p>
-            <p className="text-[10px] text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider mt-0.5">Control Hub</p>
-          </div>
+          <img
+            src="/images/logo.png"
+            alt="Logo"
+            className="h-9 w-auto object-contain"
+          />
         </div>
       </div>
 
@@ -116,7 +114,7 @@ function SidebarContent({
       </div>
 
       {/* Nav groups */}
-      <nav className="flex-1 overflow-y-auto overscroll-contain px-3 py-2 space-y-4" style={{ scrollbarWidth: "thin" }}>
+      <nav data-lenis-prevent className="flex-1 overflow-y-auto overscroll-contain px-3 py-2 space-y-4" style={{ scrollbarWidth: "thin" }}>
         {visibleGroups.map((group) => (
           <div key={group.label}>
             <p className="text-[10px] font-bold uppercase tracking-widest text-neutral-400 dark:text-zinc-600 px-3 mb-1">{group.label}</p>
@@ -294,7 +292,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="admin-layout min-h-screen bg-neutral-50 dark:bg-[#090a0f] text-foreground flex relative">
 
       {/* ── Desktop Sidebar ── */}
-      <aside className="hidden md:flex w-60 lg:w-64 shrink-0 flex-col sticky top-0 h-screen border-r border-neutral-200 dark:border-white/5 bg-white dark:bg-[#0b0c14] z-20">
+      <aside data-lenis-prevent className="hidden md:flex w-60 lg:w-64 shrink-0 flex-col sticky top-0 h-screen border-r border-neutral-200 dark:border-white/5 bg-white dark:bg-[#0b0c14] z-20">
         <SidebarContent
           user={user}
           pathname={pathname}
@@ -348,9 +346,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Menu className="h-4 w-4" />
             </button>
             <div className="flex items-center gap-2 min-w-0">
-              <div className="h-7 w-7 rounded-lg bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center shrink-0">
-                <span className="text-xs font-black text-white">Æ</span>
-              </div>
+              <img
+                src="/images/logo.png"
+                alt="Logo"
+                className="h-7 w-auto object-contain shrink-0"
+              />
               <span className="text-sm font-bold text-neutral-900 dark:text-white truncate">{currentPageLabel}</span>
             </div>
           </div>

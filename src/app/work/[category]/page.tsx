@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import { getProjectsAction } from "@/actions/projects";
-import { checkAuthAction } from "@/actions/auth";
+import { checkAuthCookieAction } from "@/actions/auth";
 import ShowcaseClient from "@/components/showcase/ShowcaseClient";
 
 const VALID_CATEGORIES = [
@@ -48,7 +48,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   const [projects, isAdmin] = await Promise.all([
     getProjectsAction(),
-    checkAuthAction(),
+    checkAuthCookieAction(),
   ]);
 
   return <ShowcaseClient projects={projects} initialCategory={category} isAdmin={isAdmin} />;

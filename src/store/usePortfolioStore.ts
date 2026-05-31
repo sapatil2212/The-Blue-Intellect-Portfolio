@@ -32,6 +32,7 @@ export interface ProjectType {
   pricing: string | null;
   featured: boolean;
   published: boolean;
+  subType?: string | null;
   tags: ProjectTag[];
   createdAt: Date | string;
   updatedAt: Date | string;

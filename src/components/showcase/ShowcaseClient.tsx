@@ -19,7 +19,10 @@ import {
   Award,
   CheckCircle2,
   FileText,
-  AlertCircle
+  AlertCircle,
+  ZoomIn,
+  ZoomOut,
+  Maximize2
 } from "lucide-react";
 import { ProjectType } from "@/store/usePortfolioStore";
 import { cn } from "@/lib/utils";
@@ -66,11 +69,21 @@ export default function ShowcaseClient({
   initialCategory = "all",
   isAdmin = false
 }: ShowcaseClientProps) {
-  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [activeProject, setActiveProject] = useState<ProjectType | null>(null);
   const [activeMediaIndex, setActiveMediaIndex] = useState(0);
   const [isPreviewLive, setIsPreviewLive] = useState(false);
+  const [selectedSubType, setSelectedSubType] = useState<string | null>(null);
+
+  // Lightbox Zoom / Pan States
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  const [lightboxImageUrl, setLightboxImageUrl] = useState("");
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
 
   // Extract all unique categories
   const categoriesList = useMemo(() => {
@@ -88,14 +101,49 @@ export default function ShowcaseClient({
     return projects.filter(p => {
       const isLive = p.published || isAdmin;
       const matchesCategory = selectedCategory === "all" || p.categoryId === selectedCategory;
+      const matchesSubType = !selectedSubType || p.subType === selectedSubType;
       const matchesSearch =
         !searchQuery ||
         p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         p.tags?.some(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()));
-      return isLive && matchesCategory && matchesSearch;
+      return isLive && matchesCategory && matchesSubType && matchesSearch;
     });
-  }, [projects, selectedCategory, searchQuery, isAdmin]);
+  }, [projects, selectedCategory, selectedSubType, searchQuery, isAdmin]);
+
+  // Extract unique subTypes for projects in the currently selected category
+  const availableSubTypes = useMemo(() => {
+    if (selectedCategory === "all") return [];
+    const types = new Set<string>();
+    projects.forEach(p => {
+      const isLive = p.published || isAdmin;
+      if (isLive && p.categoryId === selectedCategory && p.subType) {
+        types.add(p.subType.trim());
+      }
+    });
+    return Array.from(types).sort();
+  }, [projects, selectedCategory, isAdmin]);
+
+  // Counts of projects per category for UX badges
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    let total = 0;
+    
+    projects.forEach(p => {
+      const isLive = p.published || isAdmin;
+      if (isLive) {
+        total++;
+        if (p.categoryId) {
+          counts[p.categoryId] = (counts[p.categoryId] || 0) + 1;
+        }
+      }
+    });
+    
+    return {
+      all: total,
+      ...counts
+    } as Record<string, number>;
+  }, [projects, isAdmin]);
 
   // Featured Spotlight Projects (displayed on top)
   const featuredProjects = useMemo(() => {
@@ -132,7 +180,7 @@ export default function ShowcaseClient({
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-6 md:px-12 pt-32 pb-24 space-y-12">
+    <div className="w-full max-w-[1380px] mx-auto px-4 pt-32 pb-24 space-y-12">
       {/* Header Block */}
       <div className="text-center max-w-3xl mx-auto space-y-4 mb-8">
         <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] font-bold uppercase tracking-wider border border-blue-500/15 dark:border-blue-400/15">
@@ -148,48 +196,144 @@ export default function ShowcaseClient({
       </div>
 
       {/* ── Category Filters and Search Control Panel ── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-4 md:p-6 rounded-3xl border border-border/80 glass shadow-lg shadow-neutral-900/5 dark:shadow-neutral-950/20 backdrop-blur-md">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 p-4 md:p-5 rounded-3xl bg-white/60 dark:bg-neutral-950/40 backdrop-blur-xl border border-neutral-200/80 dark:border-white/10 shadow-none dark:shadow-2xl dark:shadow-neutral-950/30 transition-all duration-300">
         {/* Category Tabs */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-none w-full md:w-auto">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 lg:pb-0 scrollbar-none w-full lg:w-auto">
           <button
-            onClick={() => setSelectedCategory("all")}
+            onClick={() => {
+              setSelectedCategory("all");
+              setSelectedSubType(null);
+            }}
             className={cn(
-              "px-4.5 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border cursor-pointer",
+              "px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border cursor-pointer flex items-center gap-2",
               selectedCategory === "all"
-                ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/15"
-                : "bg-muted/30 hover:bg-muted text-muted-foreground hover:text-foreground border-border/40"
+                ? "bg-blue-600 dark:bg-blue-500 text-white border-blue-600 dark:border-blue-500 shadow-md shadow-blue-600/10 dark:shadow-blue-500/10"
+                : "bg-neutral-100/50 hover:bg-neutral-200/50 text-neutral-600 hover:text-neutral-900 dark:bg-white/5 dark:hover:bg-white/10 dark:text-neutral-400 dark:hover:text-white border-neutral-200/40 dark:border-white/5"
             )}
           >
-            All Creative Work
+            <span>All Creative Work</span>
+            <span className={cn(
+              "text-[10px] font-mono px-1.5 py-0.5 rounded-md font-bold transition-all",
+              selectedCategory === "all"
+                ? "bg-white/20 text-white"
+                : "bg-neutral-200/60 text-neutral-500 dark:bg-white/10 dark:text-neutral-400"
+            )}>
+              {categoryCounts.all}
+            </span>
           </button>
-          {categoriesList.map(cat => (
+          {categoriesList.map(cat => {
+            const isSelected = selectedCategory === cat.id;
+            const count = categoryCounts[cat.id] || 0;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => {
+                  setSelectedCategory(cat.id);
+                  setSelectedSubType(null);
+                }}
+                className={cn(
+                  "px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border cursor-pointer flex items-center gap-2",
+                  isSelected
+                    ? "bg-blue-600 dark:bg-blue-500 text-white border-blue-600 dark:border-blue-500 shadow-md shadow-blue-600/10 dark:shadow-blue-500/10"
+                    : "bg-neutral-100/50 hover:bg-neutral-200/50 text-neutral-600 hover:text-neutral-900 dark:bg-white/5 dark:hover:bg-white/10 dark:text-neutral-400 dark:hover:text-white border-neutral-200/40 dark:border-white/5"
+                )}
+              >
+                <span>{cat.name}</span>
+                <span className={cn(
+                  "text-[10px] font-mono px-1.5 py-0.5 rounded-md font-bold transition-all",
+                  isSelected
+                    ? "bg-white/20 text-white"
+                    : "bg-neutral-200/60 text-neutral-500 dark:bg-white/10 dark:text-neutral-400"
+                )}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Animated Search Container */}
+        <div className="flex items-center justify-end relative h-10 w-full lg:w-auto shrink-0">
+          <AnimatePresence initial={false}>
+            {!isSearchOpen ? (
+              <motion.button
+                key="search-trigger"
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                onClick={() => setIsSearchOpen(true)}
+                className="w-10 h-10 rounded-full border border-neutral-200 dark:border-white/10 bg-white/40 dark:bg-neutral-900/30 hover:bg-neutral-100 hover:text-blue-500 dark:hover:bg-white/10 flex items-center justify-center text-muted-foreground hover:text-foreground transition-all cursor-pointer shadow-xs shrink-0"
+                title="Search showcase"
+              >
+                <Search className="size-4" />
+              </motion.button>
+            ) : (
+              <motion.div
+                key="search-input-container"
+                initial={{ width: 0, opacity: 0 }}
+                animate={{ width: 280, opacity: 1 }}
+                exit={{ width: 0, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 350, damping: 28 }}
+                className="relative flex items-center h-10 overflow-hidden bg-white/50 dark:bg-neutral-900/30 rounded-full border border-neutral-200 dark:border-white/10"
+              >
+                <Search className="absolute left-3.5 size-4 text-muted-foreground pointer-events-none" />
+                <input
+                  type="text"
+                  autoFocus
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="Search tags or key features..."
+                  className="w-full h-full pl-10 pr-9 bg-transparent text-xs text-foreground placeholder:text-muted-foreground/60 focus:outline-none font-semibold"
+                />
+                <button
+                  onClick={() => {
+                    setIsSearchOpen(false);
+                    setSearchQuery("");
+                  }}
+                  className="absolute right-2.5 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-neutral-200/50 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                  aria-label="Close search"
+                >
+                  <X className="size-3.5" />
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* ── Sub Category Filter Menu ── */}
+      {availableSubTypes.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5 p-3 rounded-2xl bg-neutral-100/30 dark:bg-neutral-900/10 border border-neutral-200/40 dark:border-white/5 animate-fadeIn">
+          <span className="text-[10px] uppercase font-black text-muted-foreground mr-2 tracking-wider pl-1.5">
+            Filter by Sub-type:
+          </span>
+          <button
+            onClick={() => setSelectedSubType(null)}
+            className={cn(
+              "px-3 py-1 rounded-xl text-[10px] font-extrabold cursor-pointer border transition-all",
+              !selectedSubType
+                ? "bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 border-neutral-900 dark:border-white shadow-xs"
+                : "bg-transparent hover:bg-neutral-100 dark:hover:bg-white/5 text-muted-foreground hover:text-foreground border-neutral-200/60 dark:border-white/5"
+            )}
+          >
+            All
+          </button>
+          {availableSubTypes.map(sub => (
             <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
+              key={sub}
+              onClick={() => setSelectedSubType(sub)}
               className={cn(
-                "px-4.5 py-2.5 rounded-2xl text-xs font-bold whitespace-nowrap transition-all border cursor-pointer",
-                selectedCategory === cat.id
-                  ? "bg-primary text-primary-foreground border-primary shadow-md shadow-primary/15"
-                  : "bg-muted/30 hover:bg-muted text-muted-foreground hover:text-foreground border-border/40"
+                "px-3 py-1 rounded-xl text-[10px] font-extrabold cursor-pointer border transition-all",
+                selectedSubType === sub
+                  ? "bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 border-neutral-900 dark:border-white shadow-xs"
+                  : "bg-transparent hover:bg-neutral-100 dark:hover:bg-white/5 text-muted-foreground hover:text-foreground border-neutral-200/60 dark:border-white/5"
               )}
             >
-              {cat.name}
+              {sub}
             </button>
           ))}
         </div>
-
-        {/* Search Input */}
-        <div className="relative min-w-[280px] w-full md:w-auto">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search key features or design tags..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-border bg-card/60 backdrop-blur-md text-xs text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-muted-foreground font-semibold"
-          />
-        </div>
-      </div>
+      )}
 
       {/* ── Unified Creative Grid ── */}
       <div className="space-y-6">
@@ -204,10 +348,11 @@ export default function ShowcaseClient({
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <AnimatePresence mode="popLayout">
               {filteredProjects.map((project, idx) => {
                 const isFeatured = project.featured;
+                const isWebsite = project.category?.slug === "websites";
                 return (
                   <motion.div
                     key={project.id}
@@ -223,102 +368,155 @@ export default function ShowcaseClient({
                     }}
                     className={cn(
                       "group relative overflow-hidden rounded-3xl border border-border/80 glass-card flex flex-col hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 cursor-pointer",
-                      isFeatured ? "md:col-span-2 lg:col-span-2 md:flex-row min-h-[340px]" : "col-span-1 min-h-[420px]"
+                      isFeatured ? "md:col-span-2 lg:col-span-2 md:flex-row min-h-[340px]" : "col-span-1 aspect-[4/3.3]"
                     )}
                   >
-                    {/* Media / Image Area */}
-                    <div
-                      className={cn(
-                        "relative overflow-hidden bg-muted shrink-0",
-                        isFeatured 
-                          ? "w-full md:w-1/2 aspect-video md:aspect-auto md:min-h-full" 
-                          : "w-full aspect-video"
-                      )}
-                    >
-                      <img
-                        src={project.thumbnail}
-                        alt={project.title}
-                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                      />
-                      <div className="absolute inset-0 bg-black/10 group-hover:bg-black/35 transition-colors duration-300" />
-
-                      {/* Glass view indicator */}
-                      <div className="absolute top-4 right-4 flex gap-1 items-center bg-black/70 backdrop-blur-md border border-white/10 px-3 py-1.5 rounded-xl text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-bold tracking-wider">
-                        <Eye className="size-3.5 text-primary-foreground animate-pulse" />
-                        <span>View Project</span>
-                      </div>
-
-                      {/* Featured / Spotlight Badge */}
-                      {isFeatured && (
-                        <span className="absolute top-4 left-4 bg-primary text-primary-foreground text-[10px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full shadow-lg shadow-primary/20 flex items-center gap-1.5 border border-primary/20">
-                          <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-                          </span>
-                          <span>Featured Spotlight</span>
-                        </span>
-                      )}
-
-                      {/* Draft status watermark */}
-                      {!project.published && (
-                        <span className="absolute top-4 left-4 bg-rose-500 text-white text-[9px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full border border-rose-450 shadow-md">
-                          DRAFT
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Project Info Block */}
-                    <div
-                      className={cn(
-                        "p-6 flex flex-col justify-between flex-1",
-                        isFeatured ? "w-full md:w-1/2" : "w-full"
-                      )}
-                    >
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2">
-                          <span className="bg-primary/10 text-primary text-[10px] font-extrabold uppercase tracking-widest px-2.5 py-0.5 rounded-full border border-primary/10">
-                            {project.category?.name}
-                          </span>
-                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                            {projectTypesLabel[project.projectType] || project.projectType}
-                          </span>
-                        </div>
-
-                        <h3
+                    {isWebsite ? (
+                      <>
+                        {/* Media / Image Area */}
+                        <div
                           className={cn(
-                            "font-extrabold text-foreground tracking-tight group-hover:text-primary transition-colors duration-300",
-                            isFeatured ? "text-xl md:text-2xl line-clamp-2" : "text-lg line-clamp-1"
+                            "relative overflow-hidden bg-muted shrink-0",
+                            isFeatured 
+                              ? "w-full md:w-1/2 aspect-video md:aspect-auto md:min-h-full" 
+                              : "w-full aspect-[2.4/1]"
                           )}
                         >
-                          {project.title}
-                        </h3>
+                          <img
+                            src={project.thumbnail}
+                            alt={project.title}
+                            className="w-full h-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-105"
+                          />
 
-                        <p className="text-xs text-muted-foreground leading-relaxed line-clamp-4">
-                          {project.projectType === "CASE_STUDY" && project.description.trim().startsWith("{")
-                            ? JSON.parse(project.description).rawDescription
-                            : project.description}
-                        </p>
-                      </div>
 
-                      {/* Tags footer */}
-                      {project.tags && project.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1.5 mt-6 pt-4 border-t border-border/40">
-                          {project.tags.slice(0, isFeatured ? 4 : 3).map(tag => (
-                            <span
-                              key={tag.id}
-                              className="text-[10px] font-semibold px-2.5 py-0.5 bg-muted text-muted-foreground border border-border rounded-lg"
-                            >
-                              {tag.name}
+                          {/* Glass view indicator */}
+                          <div className="absolute top-4 right-4 flex gap-1.5 items-center bg-blue-600 dark:bg-blue-500 border border-blue-500/20 px-3 py-1.5 rounded-xl text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-extrabold uppercase tracking-wider shadow-lg shadow-blue-600/20">
+                            <Eye className="size-3.5 text-white animate-pulse" style={{ color: "#ffffff", stroke: "#ffffff" }} />
+                            <span className="text-white" style={{ color: "#ffffff" }}>View Project</span>
+                          </div>
+
+                          {/* Featured / Spotlight Badge */}
+                          {isFeatured && (
+                            <span className="absolute top-4 left-4 bg-primary text-primary-foreground text-[10px] font-extrabold uppercase tracking-widest px-3 py-1 rounded-full shadow-lg shadow-primary/20 flex items-center gap-1.5 border border-primary/20">
+                              <span className="relative flex h-2 w-2">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                              </span>
+                              <span>Featured Spotlight</span>
                             </span>
-                          ))}
-                          {project.tags.length > (isFeatured ? 4 : 3) && (
-                            <span className="text-[10px] font-semibold px-2 py-0.5 text-muted-foreground font-mono self-center">
-                              +{project.tags.length - (isFeatured ? 4 : 3)} more
+                          )}
+
+                          {/* Draft status watermark */}
+                          {!project.published && (
+                            <span className="absolute top-4 left-4 bg-rose-500 text-white text-[9px] font-extrabold uppercase tracking-wider px-3 py-1 rounded-full border border-rose-450 shadow-md">
+                              DRAFT
                             </span>
                           )}
                         </div>
-                      )}
-                    </div>
+
+                        {/* Project Info Block */}
+                        <div
+                          className={cn(
+                            "flex flex-col justify-between flex-1",
+                            isFeatured ? "p-6 w-full md:w-1/2" : "p-3 w-full"
+                          )}
+                        >
+                          <div className="space-y-3">
+                            <div className={cn("flex items-center flex-wrap", isFeatured ? "gap-2" : "gap-1.5")}>
+                              <span className={cn("bg-primary/10 text-primary font-extrabold uppercase rounded-full border border-primary/10", isFeatured ? "text-[10px] px-2.5 py-0.5" : "text-[8px] px-2 py-0.5 tracking-wider")}>
+                                {project.category?.name}
+                              </span>
+                              {project.subType && (
+                                <span className={cn("bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-extrabold uppercase rounded-full border border-indigo-500/10", isFeatured ? "text-[10px] px-2.5 py-0.5" : "text-[8px] px-2 py-0.5 tracking-wider")}>
+                                  {project.subType}
+                                </span>
+                              )}
+                              <span className={cn("font-bold text-muted-foreground uppercase tracking-wider", isFeatured ? "text-[10px]" : "text-[8px]")}>
+                                {projectTypesLabel[project.projectType] || project.projectType}
+                              </span>
+                            </div>
+
+                            <h3
+                              className={cn(
+                                "font-extrabold text-foreground tracking-tight group-hover:text-primary transition-colors duration-300",
+                                isFeatured ? "text-xl md:text-2xl line-clamp-2" : "text-sm md:text-base line-clamp-1"
+                              )}
+                            >
+                              {project.title}
+                            </h3>
+
+                            <p className={cn("text-neutral-600 dark:text-neutral-350 leading-relaxed font-medium", isFeatured ? "text-xs line-clamp-2" : "text-[10px] line-clamp-1")}>
+                              {project.projectType === "CASE_STUDY" && project.description.trim().startsWith("{")
+                                ? JSON.parse(project.description).rawDescription
+                                : project.description}
+                            </p>
+                          </div>
+
+                          {/* Tags footer */}
+                          {project.tags && project.tags.length > 0 && (
+                            <div className={cn("flex flex-wrap gap-1 border-t border-border/40", isFeatured ? "mt-6 pt-4" : "mt-2 pt-2")}>
+                              {project.tags.slice(0, isFeatured ? 4 : 3).map(tag => (
+                                <span
+                                  key={tag.id}
+                                  className={cn("font-semibold bg-muted text-muted-foreground border border-border rounded-lg", isFeatured ? "text-[10px] px-2.5 py-0.5" : "text-[8px] px-1.5 py-0.5")}
+                                >
+                                  {tag.name}
+                                </span>
+                              ))}
+                              {project.tags.length > (isFeatured ? 4 : 3) && (
+                                <span className={cn("font-semibold text-muted-foreground font-mono self-center", isFeatured ? "text-[10px] px-2 py-0.5" : "text-[8px] px-1 py-0.5")}>
+                                  +{project.tags.length - (isFeatured ? 4 : 3)}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </>
+                    ) : (
+                      /* Non-website Card View: ONLY show Image and Category Type Badge */
+                      <div className="relative w-full h-full overflow-hidden bg-muted flex-1">
+                        <img
+                          src={project.thumbnail}
+                          alt={project.title}
+                          className="w-full h-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-105"
+                        />
+
+
+                        {/* Floating Category Badge in top-left */}
+                        <span 
+                          className="absolute top-4 left-4 bg-blue-600 dark:bg-blue-500 text-white text-[10px] font-extrabold uppercase tracking-wider px-3 py-1.5 rounded-xl shadow-lg border border-blue-500/20"
+                          style={{ color: "#ffffff" }}
+                        >
+                          {project.category?.name}
+                        </span>
+
+                        {/* Glass view indicator in top-right */}
+                        <div className="absolute top-4 right-4 flex gap-1.5 items-center bg-blue-600 dark:bg-blue-500 border border-blue-500/20 px-3 py-1.5 rounded-xl text-[10px] text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300 font-extrabold uppercase tracking-wider shadow-lg shadow-blue-600/20">
+                          <Eye className="size-3.5 text-white animate-pulse" style={{ color: "#ffffff", stroke: "#ffffff" }} />
+                          <span className="text-white" style={{ color: "#ffffff" }}>View Project</span>
+                        </div>
+
+                        {/* Spotlight Featured watermark */}
+                        {isFeatured && (
+                          <span 
+                            className="absolute bottom-4 left-4 bg-amber-500 text-white text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-lg border border-amber-400 shadow-md"
+                            style={{ color: "#ffffff" }}
+                          >
+                            Featured Spotlight
+                          </span>
+                        )}
+
+                        {/* Draft status watermark */}
+                        {!project.published && (
+                          <span 
+                            className="absolute bottom-4 left-4 bg-rose-500 text-white text-[9px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-lg border border-rose-450 shadow-md"
+                            style={{ color: "#ffffff" }}
+                          >
+                            DRAFT
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </motion.div>
                 );
               })}
@@ -470,14 +668,36 @@ export default function ShowcaseClient({
                         <img
                           src={activeProject.media[activeMediaIndex]?.url || activeProject.thumbnail}
                           alt="Project Media"
-                          className="w-full h-full object-cover"
+                          className={cn(
+                            "w-full h-full object-cover",
+                            !(activeProject.category?.slug === "websites" || activeProject.projectType === "WEBSITE") && "cursor-zoom-in hover:opacity-90 transition-opacity"
+                          )}
+                          onClick={() => {
+                            if (!(activeProject.category?.slug === "websites" || activeProject.projectType === "WEBSITE")) {
+                              setLightboxImageUrl(activeProject.media[activeMediaIndex]?.url || activeProject.thumbnail);
+                              setZoomLevel(1);
+                              setPanOffset({ x: 0, y: 0 });
+                              setIsLightboxOpen(true);
+                            }
+                          }}
                         />
                       )
                     ) : (
                       <img
                         src={activeProject.thumbnail}
                         alt="Project Thumbnail"
-                        className="w-full h-full object-cover"
+                        className={cn(
+                          "w-full h-full object-cover",
+                          !(activeProject.category?.slug === "websites" || activeProject.projectType === "WEBSITE") && "cursor-zoom-in hover:opacity-90 transition-opacity"
+                        )}
+                        onClick={() => {
+                          if (!(activeProject.category?.slug === "websites" || activeProject.projectType === "WEBSITE")) {
+                            setLightboxImageUrl(activeProject.thumbnail);
+                            setZoomLevel(1);
+                            setPanOffset({ x: 0, y: 0 });
+                            setIsLightboxOpen(true);
+                          }
+                        }}
                       />
                     )}
                   </div>
@@ -669,6 +889,101 @@ export default function ShowcaseClient({
               </div>
             )}
           </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+      {/* ── Visual Lightbox Zoom / Pan Overlay ── */}
+      <AnimatePresence>
+        {isLightboxOpen && (
+          <div 
+            className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/95 backdrop-blur-md p-4 select-none outline-none"
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setIsLightboxOpen(false);
+            }}
+            tabIndex={0}
+          >
+            {/* Top Close Button & Toolbar */}
+            <div className="absolute top-4 right-4 z-[60] flex items-center gap-3">
+              <span className="text-[10px] text-slate-400 font-bold bg-white/5 border border-white/10 px-2.5 py-1 rounded-full uppercase tracking-wider backdrop-blur-md select-none">
+                Scroll to Zoom • Drag to Pan
+              </span>
+              <button 
+                onClick={() => setIsLightboxOpen(false)}
+                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white transition cursor-pointer"
+                title="Close interactive view"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            {/* Bottom Toolbar controls */}
+            <div className="absolute bottom-6 z-[60] flex items-center gap-2 bg-black/60 border border-white/10 px-4 py-2 rounded-2xl backdrop-blur-md shadow-2xl">
+              <button
+                onClick={() => setZoomLevel(prev => Math.max(0.5, prev - 0.25))}
+                className="p-2 rounded-lg text-white hover:bg-white/10 transition-colors cursor-pointer"
+                title="Zoom Out"
+              >
+                <ZoomOut className="size-4" />
+              </button>
+              <span className="text-[10px] font-mono font-bold tracking-widest text-white px-2.5 min-w-[50px] text-center">
+                {Math.round(zoomLevel * 100)}%
+              </span>
+              <button
+                onClick={() => setZoomLevel(prev => Math.min(4, prev + 0.25))}
+                className="p-2 rounded-lg text-white hover:bg-white/10 transition-colors cursor-pointer"
+                title="Zoom In"
+              >
+                <ZoomIn className="size-4" />
+              </button>
+              <div className="w-[1px] h-4 bg-white/10 mx-1.5" />
+              <button
+                onClick={() => {
+                  setZoomLevel(1);
+                  setPanOffset({ x: 0, y: 0 });
+                }}
+                className="p-2 rounded-lg text-white hover:bg-white/10 transition-colors cursor-pointer text-[10px] font-bold uppercase tracking-wider flex items-center gap-1"
+                title="Reset zoom & pan"
+              >
+                <Maximize2 className="size-3.5" />
+                Reset
+              </button>
+            </div>
+
+            {/* Main Interactive Image Stage */}
+            <div 
+              className="w-full h-full flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing"
+              onMouseDown={(e) => {
+                e.preventDefault();
+                setIsDragging(true);
+                setDragStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
+              }}
+              onMouseMove={(e) => {
+                if (!isDragging) return;
+                setPanOffset({
+                  x: e.clientX - dragStart.x,
+                  y: e.clientY - dragStart.y
+                });
+              }}
+              onMouseUp={() => setIsDragging(false)}
+              onMouseLeave={() => setIsDragging(false)}
+              onWheel={(e) => {
+                const delta = e.deltaY < 0 ? 0.1 : -0.1;
+                setZoomLevel(prev => Math.min(4, Math.max(0.5, prev + delta)));
+              }}
+            >
+              <img 
+                src={lightboxImageUrl} 
+                alt="Interactive View"
+                draggable={false}
+                style={{
+                  transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomLevel})`,
+                  transition: isDragging ? "none" : "transform 0.15s ease-out",
+                  boxShadow: "0 25px 50px -12px rgba(0,0,0,0.5)"
+                }}
+                className="max-w-[90vw] max-h-[80vh] w-auto h-auto object-contain rounded-lg border border-white/5 select-none"
+              />
+            </div>
+
           </div>
         )}
       </AnimatePresence>

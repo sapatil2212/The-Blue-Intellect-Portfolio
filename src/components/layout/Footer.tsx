@@ -27,10 +27,13 @@ const serviceLinks = [
 export default function Footer() {
   const pathname = usePathname();
 
-  // Exclude login and signup routes from footer
+  // Exclude admin, auth, and portal routes from footer
   if (
+    pathname.startsWith("/admin") ||
     pathname.startsWith("/login") ||
-    pathname.startsWith("/signup")
+    pathname.startsWith("/signup") ||
+    pathname.startsWith("/onboard") ||
+    pathname.startsWith("/client")
   ) {
     return null;
   }

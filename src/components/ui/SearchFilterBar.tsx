@@ -23,23 +23,9 @@ export default function SearchFilterBar() {
   const { searchQuery, setSearchQuery, selectedCategory, setSelectedCategory } = usePortfolioStore();
 
   return (
-    <div className="space-y-6 w-full max-w-4xl mx-auto">
-      {/* Search Input Bar */}
-      <div className="relative group rounded-2xl bg-white dark:bg-neutral-900 border border-neutral-200/50 dark:border-neutral-800 shadow-[0_2px_15px_rgba(0,0,0,0.02)] transition-all hover:border-neutral-300 dark:hover:border-neutral-700 p-1">
-        <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none text-neutral-400 group-focus-within:text-blue-500 transition-colors">
-          <Search className="h-4.5 w-4.5" />
-        </div>
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search projects by title, description or tags..."
-          className="w-full bg-transparent pl-11 pr-4 py-3 text-sm text-neutral-800 dark:text-neutral-200 placeholder-neutral-400 focus:outline-hidden"
-        />
-      </div>
-
-      {/* Categories Horizontal Scroll Strip */}
-      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-none justify-start md:justify-center">
+    <div className="w-full max-w-5xl mx-auto flex flex-col sm:flex-row items-center gap-4">
+      {/* Category pills */}
+      <div className="flex gap-1.5 overflow-x-auto scrollbar-none flex-1 min-w-0">
         {categories.map((cat) => {
           const isSelected = selectedCategory === cat.slug;
           return (
@@ -47,16 +33,16 @@ export default function SearchFilterBar() {
               key={cat.slug}
               onClick={() => setSelectedCategory(cat.slug)}
               className={cn(
-                "relative px-4.5 py-2.5 text-xs font-semibold rounded-full tracking-wide transition-colors whitespace-nowrap",
+                "relative px-4 py-2 text-xs font-semibold rounded-full tracking-wide transition-colors whitespace-nowrap cursor-pointer",
                 isSelected
                   ? "text-white"
-                  : "text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800"
+                  : "text-neutral-500 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800"
               )}
             >
               {isSelected && (
                 <motion.span
                   layoutId="active-category-pill"
-                  className="absolute inset-0 bg-linear-to-r from-sky-400 to-blue-600 rounded-full -z-10"
+                  className="absolute inset-0 bg-gradient-to-r from-sky-400 to-blue-600 rounded-full -z-10"
                   transition={{ type: "spring", stiffness: 350, damping: 25 }}
                 />
               )}
@@ -64,6 +50,18 @@ export default function SearchFilterBar() {
             </button>
           );
         })}
+      </div>
+
+      {/* Search input — no border box, just an underline */}
+      <div className="relative shrink-0 w-full sm:w-56">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-400 pointer-events-none" />
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search key features or design tags..."
+          className="w-full bg-transparent pl-9 pr-3 py-2 text-xs text-neutral-700 dark:text-neutral-300 placeholder-neutral-400 dark:placeholder-neutral-500 focus:outline-none border-b border-neutral-200 dark:border-neutral-700 focus:border-blue-500 dark:focus:border-blue-400 transition-colors"
+        />
       </div>
     </div>
   );

@@ -496,7 +496,7 @@ export default function FloatingNavbar() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
             onClick={() => setMobileMenuOpen(false)}
-            className="fixed inset-0 z-30 bg-black/35 dark:bg-black/60 backdrop-blur-xs md:hidden"
+            className="fixed inset-0 z-30 bg-black/35 dark:bg-black/60 backdrop-blur-sm md:hidden"
           />
         )}
       </AnimatePresence>

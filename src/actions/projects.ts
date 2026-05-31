@@ -95,6 +95,7 @@ export async function getProjectsAction(): Promise<ProjectType[]> {
       pricing: p.pricing,
       featured: p.featured,
       published: p.published,
+      subType: p.subType,
       tags: p.tags.map((t) => ({
         id: t.id,
         name: t.name,
@@ -145,6 +146,7 @@ export async function createProjectAction(data: {
   pricing?: string;
   featured?: boolean;
   published?: boolean;
+  subType?: string;
   tags: string[]; // names of tags
   media: { url: string; type: string }[];
 }): Promise<{ success: boolean; project?: ProjectType; error?: string }> {
@@ -174,6 +176,7 @@ export async function createProjectAction(data: {
         pricing: data.pricing || null,
         featured: data.featured || false,
         published: data.published !== undefined ? data.published : true,
+        subType: data.subType || null,
         tags: data.tags.map((t, idx) => ({ id: String(idx), name: t })),
         media: data.media.map((m, idx) => ({ id: String(idx), url: m.url, type: m.type })),
         createdAt: new Date().toISOString(),
@@ -199,6 +202,7 @@ export async function createProjectAction(data: {
         pricing: data.pricing || null,
         featured: data.featured || false,
         published: data.published !== undefined ? data.published : true,
+        subType: data.subType || null,
         category: {
           connect: { id: data.categoryId }
         },
@@ -241,6 +245,7 @@ export async function createProjectAction(data: {
       pricing: createdProject.pricing,
       featured: createdProject.featured,
       published: createdProject.published,
+      subType: createdProject.subType,
       tags: createdProject.tags.map(t => ({ id: t.id, name: t.name })),
       createdAt: createdProject.createdAt.toISOString(),
       updatedAt: createdProject.updatedAt.toISOString(),
@@ -271,6 +276,7 @@ export async function updateProjectAction(
     pricing?: string;
     featured?: boolean;
     published?: boolean;
+    subType?: string;
     tags: string[]; // names of tags
     media: { url: string; type: string }[];
   }
@@ -303,6 +309,7 @@ export async function updateProjectAction(
         pricing: data.pricing || null,
         featured: data.featured || false,
         published: data.published !== undefined ? data.published : true,
+        subType: data.subType || null,
         tags: data.tags.map((t, index) => ({ id: String(index), name: t })),
         media: data.media.map((m, index) => ({ id: String(index), url: m.url, type: m.type })),
         updatedAt: new Date().toISOString(),
@@ -344,6 +351,7 @@ export async function updateProjectAction(
         pricing: data.pricing || null,
         featured: data.featured || false,
         published: data.published !== undefined ? data.published : true,
+        subType: data.subType || null,
         category: {
           connect: { id: data.categoryId }
         },
@@ -386,6 +394,7 @@ export async function updateProjectAction(
       pricing: updatedProject.pricing,
       featured: updatedProject.featured,
       published: updatedProject.published,
+      subType: updatedProject.subType,
       tags: updatedProject.tags.map(t => ({ id: t.id, name: t.name })),
       createdAt: updatedProject.createdAt.toISOString(),
       updatedAt: updatedProject.updatedAt.toISOString(),

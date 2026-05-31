@@ -625,3 +625,38 @@ export async function resetPasswordAction(
     return { success: false, error: error.message || "Failed to reset password" };
   }
 }
+
+/**
+ * Fast cookie-only auth check for public pages.
+ * Does NOT hit the database — just checks if a valid session cookie exists.
+ * Use this on public pages (/, /work) where you only need to know
+ * if the user is logged in to show admin UI hints.
+ */
+export async function checkAuthCookieAction(): Promise<boolean> {
+  try {
+    const cookieStore = await cookies();
+    const session = cookieStore.get("admin_session")?.value;
+    if (!session) return false;
+
+    let decoded = "";
+    if (typeof atob !== "undefined") {
+      decoded = atob(session);
+    } else {
+      decoded = Buffer.from(session, "base64").toString("utf-8");
+    }
+
+    const parts = decoded.split(":");
+    if (parts.length < 3) return false;
+
+    const secret = parts[parts.length - 1];
+    if (secret !== SESSION_SECRET) return false;
+
+    // Check token age (2 days max)
+    const dateStr = parts[1];
+    const tokenDate = new Date(dateStr);
+    const diffDays = (Date.now() - tokenDate.getTime()) / (1000 * 60 * 60 * 24);
+    return diffDays <= 2;
+  } catch {
+    return false;
+  }
+}

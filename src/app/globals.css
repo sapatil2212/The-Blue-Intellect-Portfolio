@@ -127,6 +127,15 @@ h1, h2, h3, h4, h5, h6 {
   background: rgba(255, 255, 255, 0.2);
 }
 
+/* Hide scrollbar utility */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* Lenis CSS */
 html.lenis, html.lenis body {
   height: auto;
@@ -146,6 +155,13 @@ html.lenis, html.lenis body {
 
 .lenis.lenis-scrolling iframe {
   pointer-events: none;
+}
+
+/* ── Professional modal backdrop ── */
+.modal-backdrop {
+  background: rgba(2, 6, 23, 0.72);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
 }
 
 /* ─── Admin Panel: Light Mode Overrides ──────────────────────────────────────
@@ -600,3 +616,11 @@ html:not(.dark) button.text-white,
 html:not(.dark) button .text-white { color: #ffffff !important; }
 html:not(.dark) .text-muted { color: #475569; }
 html:not(.dark) .text-accent { color: #2563eb; }
+
+/* Blurs AetherOS sidebars and mobile header topbars when modal is open */
+body.modal-open aside,
+body.modal-open header {
+  filter: blur(5px);
+  pointer-events: none;
+  transition: filter 0.2s ease-out;
+}

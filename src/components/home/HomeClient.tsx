@@ -334,7 +334,7 @@ function TrustedBySection() {
               }}
             >
               <img
-                src={`/images/logo/client-logo/${logo.file}`}
+                src={`/images/logo/${logo.file}`}
                 alt={logo.name}
                 style={{ width: 100, height: 44, objectFit: 'contain', objectPosition: 'center' }}
                 loading="lazy"
@@ -1312,7 +1312,7 @@ function TestimonialsSection() {
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl border flex items-center justify-center bg-white p-1 shrink-0" style={{ borderColor: 'var(--border)' }}>
                   <img
-                    src={`/images/logo/client-logo/${t.logo}`}
+                    src={`/images/logo/${t.logo}`}
                     alt={t.name}
                     className="w-full h-full object-contain"
                   />
@@ -1334,7 +1334,7 @@ function TestimonialsSection() {
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl border flex items-center justify-center bg-white p-1 shrink-0" style={{ borderColor: 'var(--border)' }}>
                   <img
-                    src={`/images/logo/client-logo/${t.logo}`}
+                    src={`/images/logo/${t.logo}`}
                     alt={t.name}
                     className="w-full h-full object-contain"
                   />

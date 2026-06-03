@@ -10,12 +10,14 @@ import {
   createProjectAction,
   updateProjectAction,
   createCategoryAction,
-  deleteCategoryAction
+  deleteCategoryAction,
+  createBulkProjectsAction
 } from "@/actions/projects";
 import { ProjectType } from "@/store/usePortfolioStore";
 import { 
   Folder, Star, Trash2, Pencil, Plus, X, Save,
-  Search, Loader2, ArrowLeft, Layers, Link as LinkIcon, Film, AlertCircle, Sparkles
+  Search, Loader2, ArrowLeft, Layers, Link as LinkIcon, Film, AlertCircle, Sparkles,
+  FolderOpen, UploadCloud, Image as ImageIcon, CheckCircle
 } from "lucide-react";
 import Link from "next/link";
 import UploadDropzone from "@/components/ui/UploadDropzone";
@@ -81,6 +83,29 @@ export default function AdminPortfolioPage() {
   const [formError, setFormError] = useState("");
   const [formSuccess, setFormSuccess] = useState("");
 
+  // Bulk Upload Modal / Form States
+  const [isBulkFormOpen, setIsBulkFormOpen] = useState(false);
+  const [bulkCategoryId, setBulkCategoryId] = useState("");
+  const [bulkProjectType, setBulkProjectType] = useState("SOCIAL");
+  const [bulkTitlePrefix, setBulkTitlePrefix] = useState("");
+  const [bulkDescription, setBulkDescription] = useState("");
+  const [bulkPublished, setBulkPublished] = useState(true);
+  const [bulkTags, setBulkTags] = useState<string[]>([]);
+  const [bulkTagInput, setBulkTagInput] = useState("");
+  const [bulkFiles, setBulkFiles] = useState<{
+    id: string;
+    file: File;
+    fileName: string;
+    title: string;
+    url?: string;
+    type: string;
+    status: "PENDING" | "UPLOADING" | "SUCCESS" | "ERROR";
+    error?: string;
+  }[]>([]);
+  const [bulkError, setBulkError] = useState("");
+  const [bulkSuccess, setBulkSuccess] = useState("");
+  const [bulkSubmitting, setBulkSubmitting] = useState(false);
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -127,9 +152,19 @@ export default function AdminPortfolioPage() {
     }
   }, [formCategoryId, categories]);
 
+  // Automatically update projectType for bulk when category changes
+  useEffect(() => {
+    if (!bulkCategoryId) return;
+    const cat = categories.find(c => c.id === bulkCategoryId);
+    if (cat) {
+      const mappedType = getProjectTypeFromCategory(cat.slug || cat.name);
+      setBulkProjectType(mappedType);
+    }
+  }, [bulkCategoryId, categories]);
+
   // Manage body class for sidebar blur when modal is open
   useEffect(() => {
-    if (isFormOpen || projectToDelete !== null || isCategoryModalOpen) {
+    if (isFormOpen || projectToDelete !== null || isCategoryModalOpen || isBulkFormOpen) {
       document.body.classList.add("modal-open");
     } else {
       document.body.classList.remove("modal-open");
@@ -137,7 +172,7 @@ export default function AdminPortfolioPage() {
     return () => {
       document.body.classList.remove("modal-open");
     };
-  }, [isFormOpen, projectToDelete, isCategoryModalOpen]);
+  }, [isFormOpen, projectToDelete, isCategoryModalOpen, isBulkFormOpen]);
 
   // Portfolio Page Handlers
   const handleTogglePublish = async (id: string) => {
@@ -303,6 +338,151 @@ export default function AdminPortfolioPage() {
       setCategoryError(err.message || "An error occurred.");
     } finally {
       setCategoryDeletingId(null);
+    }
+  };
+
+  // Bulk Upload Functions
+  const handleOpenBulkModal = () => {
+    const defaultCat = categories.find(c => c.slug.includes("social") || c.name.toLowerCase().includes("social")) || categories[0];
+    setBulkCategoryId(defaultCat?.id || "");
+    setBulkProjectType("SOCIAL");
+    setBulkTitlePrefix("Social Post");
+    setBulkDescription("Social media content showcase");
+    setBulkPublished(true);
+    setBulkTags([]);
+    setBulkTagInput("");
+    setBulkFiles([]);
+    setBulkError("");
+    setBulkSuccess("");
+    setBulkSubmitting(false);
+    setIsBulkFormOpen(true);
+  };
+
+  const handleBulkFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const filesArray = Array.from(e.target.files);
+      const newItems = filesArray.map((file) => {
+        const id = Math.random().toString(36).substr(2, 9);
+        const fileName = file.name;
+        const cleanTitle = fileName
+          .substring(0, fileName.lastIndexOf("."))
+          .replace(/[-_]+/g, " ")
+          .trim();
+        const type = file.type.startsWith("video/") ? "VIDEO" : "IMAGE";
+        
+        return {
+          id,
+          file,
+          fileName,
+          title: cleanTitle,
+          type,
+          status: "PENDING" as const,
+        };
+      });
+      setBulkFiles(prev => [...prev, ...newItems]);
+    }
+  };
+
+  const uploadBulkFile = async (item: typeof bulkFiles[number]) => {
+    setBulkFiles(prev => prev.map(f => f.id === item.id ? { ...f, status: "UPLOADING" } : f));
+    
+    const formData = new FormData();
+    formData.append("file", item.file);
+    
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.success && data.url) {
+        setBulkFiles(prev => prev.map(f => f.id === item.id ? { ...f, status: "SUCCESS", url: data.url } : f));
+      } else {
+        setBulkFiles(prev => prev.map(f => f.id === item.id ? { ...f, status: "ERROR", error: data.error || "Upload failed" } : f));
+      }
+    } catch (err: any) {
+      setBulkFiles(prev => prev.map(f => f.id === item.id ? { ...f, status: "ERROR", error: err.message || "Network error" } : f));
+    }
+  };
+
+  const uploadAllPendingFiles = async () => {
+    const pending = bulkFiles.filter(f => f.status === "PENDING");
+    await Promise.all(pending.map(f => uploadBulkFile(f)));
+  };
+
+  const handleUpdateBulkFileTitle = (id: string, newTitle: string) => {
+    setBulkFiles(prev => prev.map(f => f.id === id ? { ...f, title: newTitle } : f));
+  };
+
+  const handleRemoveBulkFile = (id: string) => {
+    setBulkFiles(prev => prev.filter(f => f.id !== id));
+  };
+
+  const handleAddBulkTag = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      const cleaned = bulkTagInput.trim().replace(/,/g, "");
+      if (cleaned && !bulkTags.includes(cleaned)) {
+        setBulkTags([...bulkTags, cleaned]);
+        setBulkTagInput("");
+      }
+    }
+  };
+
+  const handleRemoveBulkTag = (index: number) => {
+    setBulkTags(bulkTags.filter((_, idx) => idx !== index));
+  };
+
+  const handleBulkSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBulkError("");
+    setBulkSuccess("");
+
+    const successFiles = bulkFiles.filter(f => f.status === "SUCCESS" && f.url);
+    if (successFiles.length === 0) {
+      setBulkError("Please upload at least one file successfully before creating posts.");
+      return;
+    }
+
+    if (!bulkCategoryId) {
+      setBulkError("Please select a category.");
+      return;
+    }
+
+    setBulkSubmitting(true);
+
+    const posts = successFiles.map((f, index) => {
+      const title = f.title.trim() || `${bulkTitlePrefix} #${index + 1}`;
+      return {
+        title,
+        url: f.url!,
+        type: f.type,
+      };
+    });
+
+    try {
+      const res = await createBulkProjectsAction({
+        categoryId: bulkCategoryId,
+        projectType: bulkProjectType,
+        description: bulkDescription.trim(),
+        published: bulkPublished,
+        tags: bulkTags,
+        posts,
+      });
+
+      if (res.success) {
+        setBulkSuccess(`Successfully created ${res.count} projects!`);
+        setTimeout(() => {
+          setIsBulkFormOpen(false);
+          fetchData();
+        }, 1500);
+      } else {
+        setBulkError(res.error || "Bulk creation failed.");
+      }
+    } catch (err: any) {
+      setBulkError(err.message || "An error occurred during bulk creation.");
+    } finally {
+      setBulkSubmitting(false);
     }
   };
 
@@ -474,6 +654,13 @@ export default function AdminPortfolioPage() {
           >
             <Layers className="h-4 w-4 text-indigo-500" />
             <span>Manage Categories</span>
+          </button>
+          <button
+            onClick={handleOpenBulkModal}
+            className="h-10 px-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-md shadow-indigo-600/10 cursor-pointer"
+          >
+            <UploadCloud className="h-4 w-4" />
+            <span>Bulk Upload Posts</span>
           </button>
           <button
             onClick={handleOpenCreateModal}
@@ -1253,6 +1440,264 @@ export default function AdminPortfolioPage() {
                 Delete Showcase
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Upload Modal */}
+      {isBulkFormOpen && (
+        <div data-lenis-prevent className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 overflow-y-auto">
+          <div className="bg-white dark:bg-zinc-950 border border-neutral-200 dark:border-white/10 rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl animate-scaleUp text-foreground my-8">
+            
+            {/* Modal Header */}
+            <div className="px-5 py-4 border-b border-neutral-200 dark:border-white/10 flex items-center justify-between bg-neutral-50 dark:bg-white/2">
+              <div>
+                <h3 className="font-bold text-sm text-foreground flex items-center gap-1.5">
+                  <UploadCloud className="h-4 w-4 text-violet-500" />
+                  Bulk Upload Social Media Posts
+                </h3>
+                <p className="text-[10px] text-zinc-550 mt-0.5">Upload multiple files to create multiple portfolio showcase entries instantly.</p>
+              </div>
+              <button 
+                onClick={() => setIsBulkFormOpen(false)}
+                className="p-1 rounded-lg border border-neutral-200 dark:border-white/5 hover:bg-neutral-100 dark:hover:bg-white/5 transition cursor-pointer text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <form onSubmit={handleBulkSubmit} className="p-6 overflow-y-auto max-h-[70vh] space-y-4">
+              {bulkError && (
+                <div className="bg-rose-50 dark:bg-rose-950/20 border border-rose-100 dark:border-rose-900/30 rounded-xl p-3 flex items-start gap-2">
+                  <AlertCircle className="h-4 w-4 text-rose-500 mt-0.5 shrink-0" />
+                  <p className="text-xs text-rose-700 dark:text-rose-450 font-semibold">{bulkError}</p>
+                </div>
+              )}
+              {bulkSuccess && (
+                <div className="bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-100 dark:border-emerald-900/30 rounded-xl p-3 flex items-start gap-2">
+                  <Star className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+                  <p className="text-xs text-emerald-700 dark:text-emerald-450 font-semibold">{bulkSuccess}</p>
+                </div>
+              )}
+
+              {/* Category & Title Settings */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block">Category *</label>
+                  <select
+                    value={bulkCategoryId}
+                    onChange={(e) => setBulkCategoryId(e.target.value)}
+                    className="w-full h-9 px-2.5 rounded-lg border border-neutral-200 dark:border-white/5 bg-neutral-50/30 dark:bg-zinc-900/30 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 cursor-pointer text-foreground bg-[#0f1016]"
+                    required
+                  >
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id} className="text-foreground bg-card">{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block">Title Prefix (if files don't have custom titles)</label>
+                  <input
+                    type="text"
+                    value={bulkTitlePrefix}
+                    onChange={(e) => setBulkTitlePrefix(e.target.value)}
+                    placeholder="e.g. Social Campaign Post"
+                    className="w-full px-2.5 py-2 rounded-lg border border-neutral-200 dark:border-white/5 bg-neutral-50/30 dark:bg-zinc-900/30 text-xs placeholder:text-zinc-500/80 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all text-foreground"
+                  />
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block">Shared Description *</label>
+                <textarea
+                  rows={2}
+                  value={bulkDescription}
+                  onChange={(e) => setBulkDescription(e.target.value)}
+                  placeholder="Shared description for all these bulk uploaded items..."
+                  className="w-full px-2.5 py-2 rounded-lg border border-neutral-200 dark:border-white/5 bg-neutral-50/30 dark:bg-zinc-900/30 text-xs placeholder:text-zinc-555 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 transition-all text-foreground"
+                  required
+                />
+              </div>
+
+              {/* Shared Tags */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block">Shared Tags</label>
+                <div className="flex flex-wrap gap-1.5 p-2 rounded-lg border border-neutral-200 dark:border-white/5 bg-neutral-50/30 dark:bg-zinc-900/30 min-h-[40px]">
+                  {bulkTags.map((tag, idx) => (
+                    <span key={idx} className="inline-flex items-center gap-1 bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[10px] font-bold px-2 py-0.5 rounded border border-blue-500/15">
+                      {tag}
+                      <button type="button" onClick={() => handleRemoveBulkTag(idx)} className="hover:text-rose-500 cursor-pointer">
+                        <X className="size-2.5" />
+                      </button>
+                    </span>
+                  ))}
+                  <input
+                    type="text"
+                    placeholder={bulkTags.length === 0 ? "Type tag and press Enter..." : "Add more..."}
+                    value={bulkTagInput}
+                    onChange={(e) => setBulkTagInput(e.target.value)}
+                    onKeyDown={handleAddBulkTag}
+                    className="flex-1 min-w-[120px] bg-transparent border-none text-xs focus:outline-none placeholder:text-zinc-550 text-foreground"
+                  />
+                </div>
+              </div>
+
+              {/* Multi-File Upload Dropzone */}
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 block">Select Media Files *</label>
+                <div className="border-2 border-dashed border-neutral-200 dark:border-white/10 hover:border-violet-500 dark:hover:border-violet-500 rounded-xl p-6 transition-all duration-300 bg-neutral-50/30 dark:bg-white/2 flex flex-col items-center justify-center cursor-pointer relative"
+                     onClick={() => document.getElementById("bulk-file-input")?.click()}>
+                  <input
+                    id="bulk-file-input"
+                    type="file"
+                    multiple
+                    accept="image/*,video/*"
+                    onChange={handleBulkFileChange}
+                    className="hidden"
+                  />
+                  <UploadCloud className="h-8 w-8 text-neutral-400 dark:text-neutral-500 mb-2 animate-bounce" />
+                  <p className="text-xs font-bold text-center uppercase tracking-wider text-foreground">
+                    Click to select multiple images or videos
+                  </p>
+                  <p className="text-[9px] text-zinc-500 text-center mt-1">
+                    Images and videos are accepted
+                  </p>
+                </div>
+              </div>
+
+              {/* Upload List & Progress */}
+              {bulkFiles.length > 0 && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-zinc-500">
+                    <span>Selected Files ({bulkFiles.length})</span>
+                    <button
+                      type="button"
+                      onClick={uploadAllPendingFiles}
+                      className="text-violet-500 hover:text-violet-600 font-bold transition flex items-center gap-1 cursor-pointer"
+                    >
+                      <UploadCloud className="size-3" />
+                      Upload All Pending
+                    </button>
+                  </div>
+                  
+                  <div className="max-h-[220px] overflow-y-auto border border-neutral-200 dark:border-white/5 rounded-xl divide-y divide-neutral-200 dark:divide-white/5 bg-neutral-50/20 dark:bg-white/1">
+                    {bulkFiles.map((item) => (
+                      <div key={item.id} className="p-3 flex items-center justify-between gap-3 hover:bg-neutral-100/30 dark:hover:bg-white/2 transition">
+                        <div className="flex items-center gap-3 flex-1 overflow-hidden">
+                          {/* File Preview */}
+                          <div className="w-10 h-10 rounded-lg bg-neutral-100 dark:bg-zinc-900 border border-neutral-200 dark:border-white/10 shrink-0 flex items-center justify-center overflow-hidden">
+                            {item.type === "VIDEO" ? (
+                              <Film className="size-5 text-violet-500 animate-pulse" />
+                            ) : (
+                              item.url ? (
+                                <img src={item.url} alt="" className="w-full h-full object-cover" />
+                              ) : (
+                                <ImageIcon className="size-5 text-blue-500" />
+                              )
+                            )}
+                          </div>
+
+                          {/* Info & Editable Title */}
+                          <div className="flex-1 min-w-0 space-y-1">
+                            <input
+                              type="text"
+                              value={item.title}
+                              onChange={(e) => handleUpdateBulkFileTitle(item.id, e.target.value)}
+                              className="w-full bg-transparent border-none text-xs font-bold text-foreground focus:outline-none focus:ring-b focus:ring-blue-500 p-0"
+                              placeholder="Post Title"
+                            />
+                            <p className="text-[9px] text-zinc-500 truncate">{item.fileName}</p>
+                          </div>
+                        </div>
+
+                        {/* Status badge / actions */}
+                        <div className="flex items-center gap-2 shrink-0">
+                          {item.status === "PENDING" && (
+                            <button
+                              type="button"
+                              onClick={() => uploadBulkFile(item)}
+                              className="px-2.5 py-1 bg-violet-600/10 hover:bg-violet-600 text-violet-500 hover:text-white rounded-lg text-[9px] font-bold transition cursor-pointer border border-violet-500/20"
+                            >
+                              Upload
+                            </button>
+                          )}
+                          {item.status === "UPLOADING" && (
+                            <span className="flex items-center gap-1 text-[9px] font-bold text-violet-500 animate-pulse">
+                              <Loader2 className="size-3.5 animate-spin" />
+                              Uploading...
+                            </span>
+                          )}
+                          {item.status === "SUCCESS" && (
+                            <span className="inline-flex px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-450 border border-emerald-500/20 text-[9px] font-bold">
+                              Ready
+                            </span>
+                          )}
+                          {item.status === "ERROR" && (
+                            <span className="inline-flex px-2 py-0.5 rounded bg-rose-500/10 text-rose-500 border border-rose-500/20 text-[9px] font-bold" title={item.error}>
+                              Failed
+                            </span>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveBulkFile(item.id)}
+                            className="p-1 rounded-lg hover:bg-rose-500/10 text-zinc-400 hover:text-rose-500 transition cursor-pointer"
+                          >
+                            <Trash2 className="size-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Published checkbox */}
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="bulk-published"
+                  checked={bulkPublished}
+                  onChange={(e) => setBulkPublished(e.target.checked)}
+                  className="rounded border-neutral-200 dark:border-white/10 text-blue-500 focus:ring-blue-500 h-4 w-4 bg-transparent cursor-pointer"
+                />
+                <label htmlFor="bulk-published" className="text-[10px] font-bold uppercase tracking-wider text-foreground cursor-pointer">
+                  Publish immediately (Visible to clients)
+                </label>
+              </div>
+
+              {/* Submit Buttons */}
+              <div className="border-t border-neutral-200 dark:border-white/10 pt-4 flex items-center justify-end gap-2.5 bg-neutral-50 dark:bg-white/2">
+                <button
+                  type="button"
+                  onClick={() => setIsBulkFormOpen(false)}
+                  className="px-4 py-2 border border-neutral-200 dark:border-white/10 rounded-xl text-xs font-semibold text-zinc-550 hover:bg-neutral-100 dark:hover:bg-white/5 transition cursor-pointer"
+                  disabled={bulkSubmitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={bulkSubmitting || bulkFiles.filter(f => f.status === "SUCCESS").length === 0}
+                  className="px-4 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-md shadow-indigo-600/10 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                >
+                  {bulkSubmitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Creating Posts...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="h-4 w-4" />
+                      <span>Create {bulkFiles.filter(f => f.status === "SUCCESS").length} Posts</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

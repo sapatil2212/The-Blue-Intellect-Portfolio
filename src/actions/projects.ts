@@ -560,3 +560,92 @@ export async function deleteCategoryAction(id: string): Promise<{ success: boole
     return { success: false, error: error.message || "Database delete failed" };
   }
 }
+
+/**
+ * Create multiple projects at once (Bulk upload).
+ */
+export async function createBulkProjectsAction(data: {
+  categoryId: string;
+  projectType: string;
+  description: string;
+  published?: boolean;
+  tags: string[]; // names of tags
+  posts: { title: string; url: string; type: string }[];
+}): Promise<{ success: boolean; count?: number; error?: string }> {
+  try {
+    const dbConnected = await isDbConnected();
+    const createdList: ProjectType[] = [];
+
+    for (const post of data.posts) {
+      const slug = post.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") + "-" + Math.random().toString(36).substr(2, 4);
+      
+      if (!dbConnected) {
+        const cat = localCategoriesState.find(c => c.id === data.categoryId) || localCategoriesState[0];
+        const newProj: ProjectType = {
+          id: Math.random().toString(36).substr(2, 9),
+          title: post.title,
+          slug,
+          description: data.description,
+          categoryId: data.categoryId,
+          category: {
+            id: cat.id,
+            name: cat.name,
+            slug: cat.slug,
+          },
+          thumbnail: post.url,
+          projectType: data.projectType,
+          websiteLink: null,
+          sourceCodeLink: null,
+          pricing: null,
+          featured: false,
+          published: data.published !== undefined ? data.published : true,
+          subType: null,
+          tags: data.tags.map((t, idx) => ({ id: String(idx), name: t })),
+          media: [{ id: "0", url: post.url, type: post.type }],
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        localProjectsState = [newProj, ...localProjectsState];
+        createdList.push(newProj);
+      } else {
+        await db.project.create({
+          data: {
+            title: post.title,
+            slug,
+            description: data.description,
+            thumbnail: post.url,
+            projectType: data.projectType,
+            websiteLink: null,
+            sourceCodeLink: null,
+            pricing: null,
+            featured: false,
+            published: data.published !== undefined ? data.published : true,
+            subType: null,
+            category: {
+              connect: { id: data.categoryId }
+            },
+            tags: {
+              connectOrCreate: data.tags.map(t => ({
+                where: { name: t },
+                create: { name: t }
+              }))
+            },
+            media: {
+              create: [{
+                url: post.url,
+                type: post.type
+              }]
+            }
+          }
+        });
+      }
+    }
+
+    revalidatePath("/work");
+    revalidatePath("/");
+    return { success: true, count: data.posts.length };
+  } catch (error: any) {
+    console.error("Prisma bulk projects create failed:", error);
+    return { success: false, error: error.message || "Database write failed" };
+  }
+}

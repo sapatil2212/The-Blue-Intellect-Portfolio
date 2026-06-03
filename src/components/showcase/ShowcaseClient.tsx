@@ -111,6 +111,33 @@ export default function ShowcaseClient({
     }
   };
 
+  // Extract all unique categories
+  const categoriesList = useMemo(() => {
+    const list = new Map<string, { id: string; name: string; slug: string }>();
+    projects.forEach(p => {
+      if (p.category) {
+        list.set(p.category.id, p.category);
+      }
+    });
+    return Array.from(list.values());
+  }, [projects]);
+
+  // Filters projects based on selected category, query, and publish status (allow admins to view drafts)
+  const filteredProjects = useMemo(() => {
+    return projects.filter(p => {
+      const isLive = p.published || isAdmin;
+      const matchesCategory = selectedCategory === "all" || p.categoryId === selectedCategory;
+      const matchesSubType = !selectedSubType || p.subType === selectedSubType;
+      const matchesSearch =
+        !searchQuery ||
+        p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (p.subType && p.subType.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        p.tags?.some(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()));
+      return isLive && matchesCategory && matchesSubType && matchesSearch;
+    });
+  }, [projects, selectedCategory, selectedSubType, searchQuery, isAdmin]);
+
   const handlePrevProject = () => {
     if (filteredProjects.length <= 1 || !activeProject) return;
     const currentIndex = filteredProjects.findIndex(p => p.id === activeProject.id);
@@ -178,33 +205,6 @@ export default function ShowcaseClient({
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [activeProject, filteredProjects, isPreviewLive, isLightboxOpen]);
-
-  // Extract all unique categories
-  const categoriesList = useMemo(() => {
-    const list = new Map<string, { id: string; name: string; slug: string }>();
-    projects.forEach(p => {
-      if (p.category) {
-        list.set(p.category.id, p.category);
-      }
-    });
-    return Array.from(list.values());
-  }, [projects]);
-
-  // Filters projects based on selected category, query, and publish status (allow admins to view drafts)
-  const filteredProjects = useMemo(() => {
-    return projects.filter(p => {
-      const isLive = p.published || isAdmin;
-      const matchesCategory = selectedCategory === "all" || p.categoryId === selectedCategory;
-      const matchesSubType = !selectedSubType || p.subType === selectedSubType;
-      const matchesSearch =
-        !searchQuery ||
-        p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (p.subType && p.subType.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        p.tags?.some(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()));
-      return isLive && matchesCategory && matchesSubType && matchesSearch;
-    });
-  }, [projects, selectedCategory, selectedSubType, searchQuery, isAdmin]);
 
   // Extract unique subTypes for projects in the currently selected category
   const availableSubTypes = useMemo(() => {

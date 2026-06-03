@@ -111,6 +111,74 @@ export default function ShowcaseClient({
     }
   };
 
+  const handlePrevProject = () => {
+    if (filteredProjects.length <= 1 || !activeProject) return;
+    const currentIndex = filteredProjects.findIndex(p => p.id === activeProject.id);
+    if (currentIndex === -1) return;
+    
+    const prevIndex = (currentIndex - 1 + filteredProjects.length) % filteredProjects.length;
+    const prevProj = filteredProjects[prevIndex];
+    const isWebsite = prevProj.category?.slug === "websites";
+    
+    setZoomLevel(1);
+    setPanOffset({ x: 0, y: 0 });
+    
+    setActiveProject(prevProj);
+    setActiveMediaIndex(0);
+    
+    if (isWebsite) {
+      setIsLightboxOpen(false);
+      setIsPreviewLive(true);
+    } else {
+      setIsPreviewLive(false);
+      setLightboxImageUrl(prevProj.thumbnail);
+      setIsLightboxOpen(true);
+    }
+  };
+
+  const handleNextProject = () => {
+    if (filteredProjects.length <= 1 || !activeProject) return;
+    const currentIndex = filteredProjects.findIndex(p => p.id === activeProject.id);
+    if (currentIndex === -1) return;
+    
+    const nextIndex = (currentIndex + 1) % filteredProjects.length;
+    const nextProj = filteredProjects[nextIndex];
+    const isWebsite = nextProj.category?.slug === "websites";
+    
+    setZoomLevel(1);
+    setPanOffset({ x: 0, y: 0 });
+    
+    setActiveProject(nextProj);
+    setActiveMediaIndex(0);
+    
+    if (isWebsite) {
+      setIsLightboxOpen(false);
+      setIsPreviewLive(true);
+    } else {
+      setIsPreviewLive(false);
+      setLightboxImageUrl(nextProj.thumbnail);
+      setIsLightboxOpen(true);
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!activeProject || filteredProjects.length <= 1) return;
+      if (!(isPreviewLive || isLightboxOpen)) return;
+      
+      if (e.key === "ArrowLeft") {
+        handlePrevProject();
+      } else if (e.key === "ArrowRight") {
+        handleNextProject();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [activeProject, filteredProjects, isPreviewLive, isLightboxOpen]);
+
   // Extract all unique categories
   const categoriesList = useMemo(() => {
     const list = new Map<string, { id: string; name: string; slug: string }>();
@@ -394,6 +462,7 @@ export default function ShowcaseClient({
                         setActiveMediaIndex(0);
                         setIsPreviewLive(!!project.websiteLink && project.projectType === "WEBSITE");
                       } else {
+                        setActiveProject(project);
                         setLightboxImageUrl(project.thumbnail);
                         setZoomLevel(1);
                         setPanOffset({ x: 0, y: 0 });
@@ -1030,6 +1099,26 @@ export default function ShowcaseClient({
           </div>
         )}
       </AnimatePresence>
+
+      {/* Floating Viewport Navigation for Modals (when either website preview or lightbox is open) */}
+      {(isPreviewLive || isLightboxOpen) && filteredProjects.length > 1 && (
+        <>
+          <button
+            onClick={handlePrevProject}
+            className="fixed left-6 top-1/2 -translate-y-1/2 z-[80] w-12 h-12 rounded-full bg-black/60 hover:bg-black/85 border border-white/10 hover:border-white/20 text-white flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 shadow-2xl cursor-pointer"
+            title="Previous project"
+          >
+            <ChevronLeft className="size-6" style={{ stroke: "#ffffff" }} />
+          </button>
+          <button
+            onClick={handleNextProject}
+            className="fixed right-6 top-1/2 -translate-y-1/2 z-[80] w-12 h-12 rounded-full bg-black/60 hover:bg-black/85 border border-white/10 hover:border-white/20 text-white flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 shadow-2xl cursor-pointer"
+            title="Next project"
+          >
+            <ChevronRight className="size-6" style={{ stroke: "#ffffff" }} />
+          </button>
+        </>
+      )}
     </div>
   );
 }

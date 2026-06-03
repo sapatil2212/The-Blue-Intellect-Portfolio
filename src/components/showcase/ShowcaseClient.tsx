@@ -22,7 +22,8 @@ import {
   AlertCircle,
   ZoomIn,
   ZoomOut,
-  Maximize2
+  Maximize2,
+  Download
 } from "lucide-react";
 import { ProjectType } from "@/store/usePortfolioStore";
 import { cn } from "@/lib/utils";
@@ -91,6 +92,24 @@ export default function ShowcaseClient({
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+  const handleDownload = async (url: string) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      const filename = url.substring(url.lastIndexOf("/") + 1).split("?")[0] || "download.jpg";
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      window.open(url, "_blank");
+    }
+  };
 
   // Extract all unique categories
   const categoriesList = useMemo(() => {
@@ -370,9 +389,16 @@ export default function ShowcaseClient({
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ delay: idx * 0.03 }}
                     onClick={() => {
-                      setActiveProject(project);
-                      setActiveMediaIndex(0);
-                      setIsPreviewLive(!!project.websiteLink && project.projectType === "WEBSITE");
+                      if (isWebsite) {
+                        setActiveProject(project);
+                        setActiveMediaIndex(0);
+                        setIsPreviewLive(!!project.websiteLink && project.projectType === "WEBSITE");
+                      } else {
+                        setLightboxImageUrl(project.thumbnail);
+                        setZoomLevel(1);
+                        setPanOffset({ x: 0, y: 0 });
+                        setIsLightboxOpen(true);
+                      }
                     }}
                     className={cn(
                       "group relative overflow-hidden rounded-3xl border border-border/80 glass-card flex flex-col hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1 transition-all duration-300 cursor-pointer",
@@ -554,10 +580,10 @@ export default function ShowcaseClient({
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
               transition={{ type: "spring", stiffness: 350, damping: 28 }}
               className={cn(
-                "relative w-full overflow-hidden rounded-3xl border border-border bg-card shadow-2xl text-foreground text-left flex flex-col transition-all duration-300",
+                "relative w-full overflow-hidden rounded-3xl border border-border shadow-2xl text-foreground text-left flex flex-col transition-all duration-300",
                 isPreviewLive 
-                  ? "max-w-7xl w-[95vw] h-[90vh]" 
-                  : "max-w-5xl w-[90vw] max-h-[90vh] p-8 overflow-y-auto"
+                  ? "max-w-7xl w-[95vw] h-[90vh] bg-white dark:bg-neutral-950" 
+                  : "max-w-5xl w-[90vw] max-h-[90vh] p-8 overflow-y-auto bg-card"
               )}
             >
               {/* Top Row: Title & Close or Browser Controls */}
@@ -954,6 +980,15 @@ export default function ShowcaseClient({
               >
                 <Maximize2 className="size-3.5" />
                 Reset
+              </button>
+              <div className="w-[1px] h-4 bg-white/10 mx-1.5" />
+              <button
+                onClick={() => handleDownload(lightboxImageUrl)}
+                className="p-2 rounded-lg text-white hover:bg-white/10 transition-colors cursor-pointer text-[10px] font-bold uppercase tracking-wider flex items-center gap-1"
+                title="Download Image"
+              >
+                <Download className="size-3.5" />
+                Download
               </button>
             </div>
 

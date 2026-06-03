@@ -48,7 +48,6 @@ model Project {
   pricing        String?
   featured       Boolean    @default(false)
   published      Boolean    @default(true)
-  subType        String?
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
   clientId       String?
@@ -56,6 +55,7 @@ model Project {
   healthScore    Int        @default(100)
   startDate      DateTime?
   status         String     @default("PLANNING")
+  subType        String?
   comments       Comment[]
   invoices       Invoice[]
   media          Media[]
